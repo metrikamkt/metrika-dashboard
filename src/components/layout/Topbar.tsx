@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { LogOut, UserCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { usePeriod } from '../../context/PeriodContext';
 import { useAuth } from '../../context/AuthContext';
+
+const PERIOD_ROUTES = ['/dashboard', '/faturamento', '/financeiro', '/vendas'];
 
 const PERIODS = [
   { value: 'mes', label: 'Este mês' },
@@ -14,6 +16,8 @@ export function Topbar() {
   const { period, setPeriod } = usePeriod();
   const { user, profile, logout } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const showPeriod = PERIOD_ROUTES.includes(pathname);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -45,22 +49,26 @@ export function Topbar() {
       style={{ left: 220 }}
     >
       <div className="flex items-center gap-3">
-        <span className="text-gray-400 text-sm">Período:</span>
-        <div className="flex bg-bg rounded-input border border-border p-0.5 gap-0.5">
-          {PERIODS.map(p => (
-            <button
-              key={p.value}
-              onClick={() => setPeriod(p.value)}
-              className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
-                period === p.value
-                  ? 'bg-primary text-white'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
+        {showPeriod && (
+          <>
+            <span className="text-gray-400 text-sm">Período:</span>
+            <div className="flex bg-bg rounded-input border border-border p-0.5 gap-0.5">
+              {PERIODS.map(p => (
+                <button
+                  key={p.value}
+                  onClick={() => setPeriod(p.value)}
+                  className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
+                    period === p.value
+                      ? 'bg-primary text-white'
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       <div className="relative" ref={menuRef}>
