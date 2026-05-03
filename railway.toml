@@ -4,6 +4,4 @@ buildCommand = "npm run build"
 
 [deploy]
 startCommand = "npx serve -s dist -l 4173"
-healthcheckPath = "/"
-healthcheckTimeout = 60
 restartPolicyType = "on_failure"
