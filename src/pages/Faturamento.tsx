@@ -7,6 +7,7 @@ import { FormField } from '../components/ui/FormField';
 import { SaveCancelButtons } from '../components/ui/SaveCancelButtons';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Plus, Trash2, Upload, Target, TrendingUp } from 'lucide-react';
+import { PeriodSelector } from '../components/ui/PeriodSelector';
 import type { Lancamento } from '../data/mockData';
 
 const NOW_MES = 5;
@@ -82,7 +83,8 @@ export default function Faturamento() {
           <h1 className="text-2xl font-bold text-white">Faturamento</h1>
           <p className="text-gray-500 text-sm mt-0.5">Lançamentos e receita do período</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <PeriodSelector />
           <button onClick={() => { setMetaEdit(data.metaFaturamento); setDrawerMode('metas'); }}
             className="flex items-center gap-2 px-3 py-2 bg-surface border border-border rounded-input text-gray-300 text-sm hover:border-primary/40 transition-all">
             <Target size={14} /> Metas

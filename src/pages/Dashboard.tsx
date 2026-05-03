@@ -4,6 +4,7 @@ import { useData } from '../context/DataContext';
 import { usePeriod } from '../context/PeriodContext';
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from 'recharts';
 import { AlertCircle, ArrowRight, Plus, CheckCircle2 } from 'lucide-react';
+import { PeriodSelector } from '../components/ui/PeriodSelector';
 import type { DemandaPrioridade } from '../data/mockData';
 
 const NOW_MES = 5;
@@ -100,6 +101,9 @@ export default function Dashboard() {
         <p className="text-gray-500 text-sm mt-1">
           {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
         </p>
+        <div className="mt-3">
+          <PeriodSelector />
+        </div>
       </div>
 
       {/* ── KPI Row ─────────────────────────────────────────────────── */}

@@ -6,6 +6,7 @@ import { Drawer } from '../components/layout/Drawer';
 import { FormField } from '../components/ui/FormField';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Plus, Trash2 } from 'lucide-react';
+import { PeriodSelector } from '../components/ui/PeriodSelector';
 import type { Custo } from '../data/mockData';
 
 const NOW_MES = 5;
@@ -80,10 +81,13 @@ export default function Financeiro() {
           <h1 className="text-2xl font-bold text-white">Financeiro</h1>
           <p className="text-gray-500 text-sm">DRE e controle de custos</p>
         </div>
-        <button onClick={() => { setForm(BLANK); setDrawerOpen(true); }}
-          className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-input text-sm font-medium transition-all">
-          <Plus size={14} /> Registrar Custo
-        </button>
+        <div className="flex items-center gap-2">
+          <PeriodSelector />
+          <button onClick={() => { setForm(BLANK); setDrawerOpen(true); }}
+            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-input text-sm font-medium transition-all">
+            <Plus size={14} /> Registrar Custo
+          </button>
+        </div>
       </div>
 
       {/* KPIs */}

@@ -6,6 +6,7 @@ import { Drawer } from '../components/layout/Drawer';
 import { FormField } from '../components/ui/FormField';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Plus, Trash2 } from 'lucide-react';
+import { PeriodSelector } from '../components/ui/PeriodSelector';
 import type { Lancamento } from '../data/mockData';
 
 const NOW_MES = 5;
@@ -80,10 +81,13 @@ export default function Vendas() {
           <h1 className="text-2xl font-bold text-white">Vendas</h1>
           <p className="text-gray-500 text-sm">Fechamentos e receita gerada</p>
         </div>
-        <button onClick={() => { setForm(BLANK); setDrawerOpen(true); }}
-          className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-input text-sm font-medium transition-all">
-          <Plus size={14} /> Registrar Venda
-        </button>
+        <div className="flex items-center gap-2">
+          <PeriodSelector />
+          <button onClick={() => { setForm(BLANK); setDrawerOpen(true); }}
+            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-input text-sm font-medium transition-all">
+            <Plus size={14} /> Registrar Venda
+          </button>
+        </div>
       </div>
 
       {/* KPIs */}
