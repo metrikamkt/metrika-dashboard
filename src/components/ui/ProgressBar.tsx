@@ -12,7 +12,7 @@ function getColor(pct: number) {
   return 'bg-red-500';
 }
 
-export function ProgressBar({ label, atual, alvo, unidade = '', responsavel }: ProgressBarProps) {
+export function ProgressBar({ label, atual, alvo, unidade: _unidade = '', responsavel }: ProgressBarProps) {
   const pct = Math.min((atual / alvo) * 100, 100);
   const color = getColor(pct);
 

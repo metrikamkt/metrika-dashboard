@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { usePeriod } from '../context/PeriodContext';
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from 'recharts';
-import { AlertCircle, Clock, ArrowRight, Plus, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, ArrowRight, Plus, CheckCircle2 } from 'lucide-react';
 import type { DemandaPrioridade } from '../data/mockData';
 
 const NOW_MES = 5;

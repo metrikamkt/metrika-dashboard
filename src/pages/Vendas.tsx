@@ -109,7 +109,7 @@ export default function Vendas() {
               <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
               <XAxis dataKey="mes" stroke="#444" tick={{ fill: '#777', fontSize: 11 }} />
               <YAxis tickFormatter={v => `R$${(v / 1000).toFixed(0)}k`} stroke="#444" tick={{ fill: '#777', fontSize: 11 }} />
-              <Tooltip formatter={(v: number) => [fmt(v), 'Receita']} contentStyle={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 8 }} />
+              <Tooltip formatter={(v) => [fmt(v as number), 'Receita']} contentStyle={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 8 }} />
               <Bar dataKey="valor" fill="#0087f0" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
