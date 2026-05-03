@@ -47,7 +47,7 @@ export default function Vendas() {
   const maxF = Math.max(...funnelData.map(f => f.qty), 1);
 
   // Conversion rate per stage
-  const taxas = etapas.slice(0, -1).map((e, i) => {
+  const taxas = etapas.slice(0, -1).map((_e, i) => {
     const atual = funnelData[i].qty;
     const proximo = funnelData[i + 1].qty;
     return { etapa: `${etapas[i]}→${etapas[i + 1]}`, taxa: atual > 0 ? +(proximo / atual * 100).toFixed(1) : 0 };

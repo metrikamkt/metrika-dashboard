@@ -4,7 +4,7 @@ import { useToast } from '../context/ToastContext';
 import { usePeriod } from '../context/PeriodContext';
 import { Drawer } from '../components/layout/Drawer';
 import { FormField } from '../components/ui/FormField';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Plus, Trash2 } from 'lucide-react';
 import type { Custo } from '../data/mockData';
 
@@ -109,7 +109,7 @@ export default function Financeiro() {
             <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
             <XAxis dataKey="mes" stroke="#444" tick={{ fill: '#777', fontSize: 11 }} />
             <YAxis tickFormatter={v => `R$${(v / 1000).toFixed(0)}k`} stroke="#444" tick={{ fill: '#777', fontSize: 10 }} />
-            <Tooltip formatter={(v: number) => [fmt(v)]} contentStyle={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 8 }} />
+            <Tooltip formatter={(v) => [fmt(v as number)]} contentStyle={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 8 }} />
             <Legend wrapperStyle={{ fontSize: 12, color: '#888' }} />
             <Bar dataKey="receita" name="Receita" fill="#0087f0" radius={[4, 4, 0, 0]} />
             <Bar dataKey="custos" name="Custos" fill="#01c2f0" radius={[4, 4, 0, 0]} opacity={0.65} />

@@ -132,7 +132,7 @@ export default function Faturamento() {
               <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
               <XAxis dataKey="mes" stroke="#444" tick={{ fill: '#777', fontSize: 11 }} />
               <YAxis tickFormatter={v => `R$${(v / 1000).toFixed(0)}k`} stroke="#444" tick={{ fill: '#777', fontSize: 11 }} />
-              <Tooltip formatter={(v: number) => [fmt(v), 'Receita']} contentStyle={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 8 }} />
+              <Tooltip formatter={(v) => [fmt(v as number), 'Receita']} contentStyle={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 8 }} />
               <Line type="monotone" dataKey="valor" stroke="#0087f0" strokeWidth={2} dot={{ fill: '#0087f0', r: 4 }} />
             </LineChart>
           </ResponsiveContainer>
@@ -147,7 +147,7 @@ export default function Faturamento() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" horizontal={false} />
                 <XAxis type="number" tickFormatter={v => `R$${(v / 1000).toFixed(0)}k`} stroke="#444" tick={{ fill: '#777', fontSize: 11 }} />
                 <YAxis type="category" dataKey="nome" width={90} stroke="#444" tick={{ fill: '#aaa', fontSize: 11 }} />
-                <Tooltip formatter={(v: number) => [fmt(v), 'Valor']} contentStyle={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 8 }} />
+                <Tooltip formatter={(v) => [fmt(v as number), 'Valor']} contentStyle={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 8 }} />
                 <Bar dataKey="valor" radius={[0, 4, 4, 0]}>
                   {porProduto.map((_, i) => <Cell key={i} fill={i % 2 === 0 ? '#0087f0' : '#01c2f0'} />)}
                 </Bar>

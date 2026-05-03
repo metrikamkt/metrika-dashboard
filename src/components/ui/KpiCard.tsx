@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { BarChart, Bar, ResponsiveContainer } from 'recharts';
 
 interface KpiCardProps {

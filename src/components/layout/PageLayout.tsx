@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Edit2 } from 'lucide-react';
 
 interface PageLayoutProps {
