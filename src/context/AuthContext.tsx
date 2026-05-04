@@ -6,7 +6,7 @@ import {
   updateProfile,
   type User,
 } from 'firebase/auth';
-import { doc, onSnapshot, setDoc, arrayUnion, arrayRemove, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { auth, googleProvider, db } from '../lib/firebase';
 
 export interface ProfileData {
@@ -104,12 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const addAllowedEmail = useCallback(async (email: string) => {
     if (!isAdmin) return;
-    const snap = await getDoc(ACCESS_DOC);
-    if (snap.exists()) {
-      await setDoc(ACCESS_DOC, { emails: arrayUnion(email) }, { merge: true });
-    } else {
-      await setDoc(ACCESS_DOC, { emails: [email] });
-    }
+    await setDoc(ACCESS_DOC, { emails: arrayUnion(email) }, { merge: true });
   }, [isAdmin]);
 
   const removeAllowedEmail = useCallback(async (email: string) => {
