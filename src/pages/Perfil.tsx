@@ -1,13 +1,16 @@
 import { useState, useRef } from 'react';
-import { Camera, Mail, Phone, Briefcase, User, Save, Loader2 } from 'lucide-react';
+import { Camera, Mail, Phone, Briefcase, User, Save, Loader2, DatabaseBackup } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { useData } from '../context/DataContext';
 
 export default function Perfil() {
-  const { user, profile, updateUserProfile } = useAuth();
+  const { user, profile, updateUserProfile, isAdmin } = useAuth();
   const { showToast } = useToast();
+  const { migrateFromLocalStorage } = useData();
   const fileRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
+  const [migrating, setMigrating] = useState(false);
 
   const [form, setForm] = useState({
     displayName: profile?.displayName ?? user?.displayName ?? '',
@@ -170,6 +173,34 @@ export default function Perfil() {
           {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
           {saving ? 'Salvando...' : 'Salvar alterações'}
         </button>
+
+        {/* Migração de dados — apenas admin */}
+        {isAdmin && localStorage.getItem('metrika_data_v2') && (
+          <div className="mt-4 p-4 bg-yellow-500/5 border border-yellow-500/20 rounded-input">
+            <p className="text-yellow-400 text-xs font-medium mb-1">Dados antigos encontrados</p>
+            <p className="text-gray-500 text-xs mb-3">
+              Encontramos dados salvos localmente no navegador. Clique abaixo para importá-los para o banco de dados.
+            </p>
+            <button
+              onClick={async () => {
+                setMigrating(true);
+                const ok = await migrateFromLocalStorage();
+                setMigrating(false);
+                if (ok) {
+                  showToast('Dados importados com sucesso!');
+                  localStorage.removeItem('metrika_data_v2');
+                } else {
+                  showToast('Nenhum dado encontrado para importar');
+                }
+              }}
+              disabled={migrating}
+              className="w-full flex items-center justify-center gap-2 py-2 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 rounded-input text-sm font-medium transition-colors disabled:opacity-60"
+            >
+              {migrating ? <Loader2 size={14} className="animate-spin" /> : <DatabaseBackup size={14} />}
+              {migrating ? 'Importando...' : 'Importar dados do navegador'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

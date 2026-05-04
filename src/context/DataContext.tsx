@@ -70,6 +70,7 @@ interface DataContextType {
   dispatch: React.Dispatch<Action>;
   isAdmin: boolean;
   loaded: boolean;
+  migrateFromLocalStorage: () => Promise<boolean>;
 }
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -115,8 +116,23 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     dispatch(action);
   }, [isAdmin]);
 
+  // One-time migration from localStorage to Firestore
+  const migrateFromLocalStorage = useCallback(async (): Promise<boolean> => {
+    if (!isAdmin) return false;
+    const stored = localStorage.getItem('metrika_data_v2');
+    if (!stored) return false;
+    try {
+      const parsed = JSON.parse(stored) as MetrikaData;
+      await setDoc(FIRESTORE_DOC, parsed);
+      dispatch({ type: 'LOAD', payload: parsed });
+      return true;
+    } catch {
+      return false;
+    }
+  }, [isAdmin]);
+
   return (
-    <DataContext.Provider value={{ data, dispatch: safeDispatch, isAdmin, loaded }}>
+    <DataContext.Provider value={{ data, dispatch: safeDispatch, isAdmin, loaded, migrateFromLocalStorage }}>
       {children}
     </DataContext.Provider>
   );
