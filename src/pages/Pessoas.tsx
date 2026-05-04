@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 import { Drawer } from '../components/layout/Drawer';
 import { FormField } from '../components/ui/FormField';
-import { Plus, Trash2, X, Camera, Gift } from 'lucide-react';
+import { Plus, Trash2, X, Camera, Gift, ShieldCheck } from 'lucide-react';
 import type { Pessoa } from '../data/mockData';
 
 const BLANK: Omit<Pessoa, 'id'> = {
@@ -15,6 +16,8 @@ const BLANK: Omit<Pessoa, 'id'> = {
 export default function Pessoas() {
   const { data, dispatch } = useData();
   const { showToast } = useToast();
+  const { isAdmin, allowedEmails, addAllowedEmail, removeAllowedEmail } = useAuth();
+  const [novoEmail, setNovoEmail] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editPessoa, setEditPessoa] = useState<Pessoa | null>(null);
   const [form, setForm] = useState<Omit<Pessoa, 'id'>>(BLANK);
@@ -244,6 +247,65 @@ export default function Pessoas() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Controle de Acesso — visível só para admin */}
+      {isAdmin && (
+        <div className="mt-8 bg-surface border border-border rounded-card p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <ShieldCheck size={16} className="text-primary" />
+            <h3 className="text-white font-semibold">Controle de Acesso</h3>
+          </div>
+          <p className="text-gray-500 text-xs mb-4">Somente os e-mails abaixo podem fazer login no sistema.</p>
+
+          {/* Add email */}
+          <div className="flex gap-2 mb-4">
+            <input
+              type="email"
+              value={novoEmail}
+              onChange={e => setNovoEmail(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { addAllowedEmail(novoEmail.trim()); setNovoEmail(''); } }}
+              placeholder="email@gmail.com"
+              className="flex-1 bg-bg border border-border rounded-input px-3 py-2 text-white text-sm focus:outline-none focus:border-primary"
+            />
+            <button
+              onClick={async () => {
+                if (!novoEmail.trim()) return;
+                await addAllowedEmail(novoEmail.trim());
+                showToast('Acesso concedido');
+                setNovoEmail('');
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-input text-sm font-medium"
+            >
+              <Plus size={14} /> Convidar
+            </button>
+          </div>
+
+          {/* List */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between px-3 py-2 bg-bg border border-primary/20 rounded-input">
+              <div className="flex items-center gap-2">
+                <ShieldCheck size={13} className="text-primary" />
+                <span className="text-sm text-white">arthur.haag2511@gmail.com</span>
+              </div>
+              <span className="text-xs text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5">Admin</span>
+            </div>
+            {allowedEmails.map(email => (
+              <div key={email} className="flex items-center justify-between px-3 py-2 bg-bg border border-border rounded-input">
+                <span className="text-sm text-gray-300">{email}</span>
+                <button
+                  onClick={async () => { await removeAllowedEmail(email); showToast('Acesso removido'); }}
+                  className="text-gray-600 hover:text-red-400 transition-colors"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            ))}
+            {allowedEmails.length === 0 && (
+              <p className="text-gray-600 text-xs text-center py-3">Nenhum convidado ainda</p>
+            )}
           </div>
         </div>
       )}
