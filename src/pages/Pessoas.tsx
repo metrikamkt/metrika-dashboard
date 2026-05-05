@@ -92,7 +92,7 @@ export default function Pessoas() {
       )}
 
       {/* KPIs */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
           { label: 'Headcount', value: data.pessoas.length },
           { label: 'Departamentos', value: [...new Set(data.pessoas.map(p => p.departamento).filter(Boolean))].length },
@@ -107,7 +107,7 @@ export default function Pessoas() {
       </div>
 
       {/* People grid */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {data.pessoas.map(p => (
           <div key={p.id} onClick={() => setPopup(p)}
             className="bg-surface border border-border rounded-card p-5 cursor-pointer hover:border-primary/40 transition-all group">

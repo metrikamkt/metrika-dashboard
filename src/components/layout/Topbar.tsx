@@ -32,10 +32,7 @@ export function Topbar() {
     .toUpperCase();
 
   return (
-    <header
-      className="fixed top-0 right-0 h-16 bg-surface border-b border-border z-20 flex items-center justify-between px-6"
-      style={{ left: 220 }}
-    >
+    <header className="fixed top-0 left-0 md:left-[220px] right-0 h-16 bg-surface border-b border-border z-20 flex items-center justify-between px-4 md:px-6">
       <div />
 
       <div className="relative" ref={menuRef}>

@@ -107,7 +107,7 @@ export default function Dashboard() {
       </div>
 
       {/* ── KPI Row ─────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
           { label: 'Faturamento', value: fmt(counterFat), pct: data.metaFaturamento > 0 ? totalFat / data.metaFaturamento * 100 : 0, sub: `Meta: ${fmt(data.metaFaturamento)}` },
           { label: 'Clientes Ativos', value: String(counterAtivos), pct: null, sub: `${novosClientes} novos no período` },
@@ -134,8 +134,8 @@ export default function Dashboard() {
       </div>
 
       {/* ── Row 2 ───────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="col-span-2 bg-surface border border-border rounded-card p-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="md:col-span-2 bg-surface border border-border rounded-card p-5">
           <h3 className="text-white font-semibold mb-4">Faturamento por Serviço</h3>
           {porServico.length === 0 ? (
             <p className="text-gray-600 text-sm text-center py-10">Nenhum lançamento no período</p>
@@ -185,8 +185,8 @@ export default function Dashboard() {
       </div>
 
       {/* ── Row 3: Demands + Funnel ─────────────────────────────────── */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-2 bg-surface border border-border rounded-card p-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="md:col-span-2 bg-surface border border-border rounded-card p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-white font-semibold flex items-center gap-2">
               <AlertCircle size={16} className="text-red-400" /> Demandas Urgentes & Altas

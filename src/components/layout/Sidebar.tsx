@@ -35,7 +35,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className="fixed left-0 top-0 h-screen bg-surface border-r border-border z-30 flex flex-col transition-all duration-300"
+      className="hidden md:flex fixed left-0 top-0 h-screen bg-surface border-r border-border flex-col transition-all duration-300 z-30"
       style={{ width: collapsed ? 64 : 220 }}
     >
       <div className="flex items-center justify-between p-4 border-b border-border min-h-[64px]">

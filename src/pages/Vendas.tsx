@@ -91,7 +91,7 @@ export default function Vendas() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {[
           { label: 'Receita no Período', value: fmt(total) },
           { label: 'Vendas Fechadas', value: String(filtered.length) },
@@ -104,7 +104,7 @@ export default function Vendas() {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         {/* Monthly revenue */}
         <div className="bg-surface border border-border rounded-card p-5">
           <h3 className="text-white font-semibold mb-4">Receita Mensal</h3>

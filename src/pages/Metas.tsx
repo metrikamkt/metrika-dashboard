@@ -76,7 +76,7 @@ export default function Metas() {
       </div>
 
       {/* Global goals summary */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         {[
           { label: 'Meta Mensal de Faturamento', value: `R$ ${data.metaFaturamento.toLocaleString('pt-BR')}` },
           { label: 'Meta de Novos Clientes/Mês', value: `${data.metaNovosClientes} clientes` },
@@ -92,7 +92,7 @@ export default function Metas() {
       </div>
 
       {/* Metas grid */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {data.metas.map((meta, i) => {
           const pct = meta.alvo > 0 ? Math.min((meta.atual / meta.alvo) * 100, 100) : 0;
           const colors = getColor(pct);

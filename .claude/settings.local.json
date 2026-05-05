@@ -10,7 +10,12 @@
       "Bash(npx tsc *)",
       "PowerShell($env:Path = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); cd \"C:\\\\Users\\\\arthu\\\\Desktop\\\\Dash Metrika\"; node node_modules/.bin/tsc --noEmit 2>&1 | Select-Object -First 80)",
       "Bash(npm install *)",
-      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; & \"C:\\\\Program Files\\\\nodejs\\\\npm.cmd\" install firebase --prefix \"C:\\\\Users\\\\arthu\\\\Desktop\\\\Dash Metrika\")"
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; & \"C:\\\\Program Files\\\\nodejs\\\\npm.cmd\" install firebase --prefix \"C:\\\\Users\\\\arthu\\\\Desktop\\\\Dash Metrika\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git commit -m 'Move funnel chart below kanban board *)",
+      "Bash(dir \"C:\\\\Users\\\\arthu\\\\Downloads\" /b /o:-d)"
     ]
   }
 }

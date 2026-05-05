@@ -97,7 +97,7 @@ export default function Faturamento() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-surface border border-border rounded-card p-5">
           <p className="text-gray-500 text-xs uppercase tracking-wide">Faturamento Total</p>
           <p className="text-3xl font-bold text-white mt-2">{fmt(total)}</p>
@@ -126,7 +126,7 @@ export default function Faturamento() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div className="bg-surface border border-border rounded-card p-5">
           <h3 className="text-white font-semibold mb-4">Evolução Mensal</h3>
           <ResponsiveContainer width="100%" height={220}>

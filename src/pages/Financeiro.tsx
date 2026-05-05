@@ -91,7 +91,7 @@ export default function Financeiro() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
           { label: 'Receita', value: fmt(totalReceita), color: 'text-cyan' },
           { label: 'Total de Custos', value: fmt(totalCustos), color: 'text-orange-400' },
@@ -122,7 +122,7 @@ export default function Financeiro() {
       </div>
 
       {/* Cost tables */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Fixed */}
         <div className="bg-surface border border-border rounded-card overflow-hidden">
           <div className="px-5 py-4 border-b border-border flex items-center justify-between">

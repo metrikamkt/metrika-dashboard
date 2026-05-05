@@ -83,7 +83,7 @@ export default function Demandas() {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
           { label: 'Urgentes', value: counts.urgentes, color: 'text-red-400' },
           { label: 'Abertas', value: counts.abertas, color: 'text-orange-400' },
