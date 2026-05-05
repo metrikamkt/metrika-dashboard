@@ -74,14 +74,14 @@ export default function CRM() {
         </button>
       </div>
 
-      {/* Kanban board */}
-      <div className="grid grid-cols-6 gap-3 min-h-[60vh]">
+      {/* Kanban board — fixed height so columns scroll internally */}
+      <div className="grid grid-cols-6 gap-3 h-[calc(100vh-13rem)]">
         {ETAPAS.map(etapa => {
           const leads = data.leads.filter(l => l.etapa === etapa.key);
           const total = leads.reduce((s, l) => s + l.valor, 0);
           return (
-            <div key={etapa.key} className={`bg-surface border rounded-card flex flex-col ${etapa.color}`}>
-              <div className="p-3 border-b border-border">
+            <div key={etapa.key} className={`bg-surface border rounded-card flex flex-col h-full ${etapa.color}`}>
+              <div className="p-3 border-b border-border flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <span className={`text-xs font-semibold uppercase tracking-wide ${ETAPA_TEXT[etapa.key]}`}>{etapa.label}</span>
                   <span className="text-xs bg-bg border border-border rounded-full px-2 py-0.5 text-gray-400">{leads.length}</span>
@@ -89,7 +89,7 @@ export default function CRM() {
                 {total > 0 && <p className="text-xs text-gray-600 mt-0.5">{fmt(total)}</p>}
               </div>
 
-              <div className="flex-1 p-2 flex flex-col gap-2 overflow-y-auto">
+              <div className="flex-1 min-h-0 p-2 flex flex-col gap-2 overflow-y-auto">
                 {leads.map(lead => (
                   <div key={lead.id}
                     onClick={() => openEdit(lead)}

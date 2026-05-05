@@ -1,18 +1,16 @@
 import { useState, useRef } from 'react';
-import { Camera, Mail, Phone, Briefcase, User, Save, Loader2, DatabaseBackup, Upload } from 'lucide-react';
+import { Camera, Mail, Phone, Briefcase, User, Save, Loader2, DatabaseBackup } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useData } from '../context/DataContext';
-import { csvLeads } from '../data/csvLeads';
 
 export default function Perfil() {
   const { user, profile, updateUserProfile, isAdmin } = useAuth();
   const { showToast } = useToast();
-  const { migrateFromLocalStorage, dispatch, forceWrite } = useData();
+  const { migrateFromLocalStorage } = useData();
   const fileRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [migrating, setMigrating] = useState(false);
-  const [importingLeads, setImportingLeads] = useState(false);
 
   const [form, setForm] = useState({
     displayName: profile?.displayName ?? user?.displayName ?? '',
@@ -176,39 +174,6 @@ export default function Perfil() {
           {saving ? 'Salvando...' : 'Salvar alterações'}
         </button>
 
-        {/* Importar leads do CSV — apenas admin */}
-        {isAdmin && (
-          <div className="mt-4 p-4 bg-primary/5 border border-primary/20 rounded-input">
-            <p className="text-primary text-xs font-medium mb-1">Importar Leads do CSV</p>
-            <p className="text-gray-500 text-xs mb-3">
-              Importa {csvLeads.length} leads para o CRM. Leads duplicados serão adicionados novamente.
-            </p>
-            <button
-              onClick={async () => {
-                setImportingLeads(true);
-                try {
-                  const base = Date.now();
-                  csvLeads.forEach((lead, i) => {
-                    dispatch({ type: 'ADD_LEAD', payload: { ...lead, id: `csv_${base}_${i}` } });
-                  });
-                  // Wait one tick for reducer to accumulate all dispatches, then force-write
-                  await new Promise(r => setTimeout(r, 100));
-                  await forceWrite();
-                  showToast(`${csvLeads.length} leads importados e salvos com sucesso!`);
-                } catch {
-                  showToast('Erro ao importar leads');
-                } finally {
-                  setImportingLeads(false);
-                }
-              }}
-              disabled={importingLeads}
-              className="w-full flex items-center justify-center gap-2 py-2 bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary rounded-input text-sm font-medium transition-colors disabled:opacity-60"
-            >
-              {importingLeads ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-              {importingLeads ? 'Importando...' : `Importar ${csvLeads.length} leads para o CRM`}
-            </button>
-          </div>
-        )}
 
         {/* Migração de dados — apenas admin */}
         {isAdmin && localStorage.getItem('metrika_data_v2') && (
