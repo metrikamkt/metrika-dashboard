@@ -6,13 +6,14 @@ import { FormField } from '../components/ui/FormField';
 import { Plus, Trash2, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 import type { Lead, LeadEtapa } from '../data/mockData';
 
+/* ─── Etapas do Kanban ─────────────────────────────────────────────────────── */
 const ETAPAS: { key: LeadEtapa; label: string; color: string }[] = [
-  { key: 'lead',        label: 'Lead',        color: 'border-gray-500/40' },
-  { key: 'qualificado', label: 'Qualificado', color: 'border-blue-500/40' },
-  { key: 'proposta',    label: 'Proposta',    color: 'border-yellow-500/40' },
-  { key: 'negociacao',  label: 'Negociação',  color: 'border-orange-500/40' },
-  { key: 'fechado',     label: 'Fechado',     color: 'border-green-500/40' },
-  { key: 'perdido',     label: 'Perdido',     color: 'border-red-500/40' },
+  { key: 'lead',        label: 'Lead',              color: 'border-gray-500/40'   },
+  { key: 'qualificado', label: 'Lead Qualificado',  color: 'border-blue-500/40'   },
+  { key: 'proposta',    label: 'Reunião Agendada',  color: 'border-yellow-500/40' },
+  { key: 'negociacao',  label: 'Reunião Feita',     color: 'border-orange-500/40' },
+  { key: 'fechado',     label: 'Fechamento',        color: 'border-green-500/40'  },
+  { key: 'perdido',     label: 'Perdido',           color: 'border-red-500/40'    },
 ];
 
 const ETAPA_TEXT: Record<LeadEtapa, string> = {
@@ -20,6 +21,159 @@ const ETAPA_TEXT: Record<LeadEtapa, string> = {
   negociacao: 'text-orange-400', fechado: 'text-green-400', perdido: 'text-red-400',
 };
 
+/* ─── Funil de Conversão ────────────────────────────────────────────────────── */
+// metaConv = taxa de conversão esperada EM RELAÇÃO À ETAPA ANTERIOR (%)
+// metaPct  = % acumulada em relação a 100 leads na entrada
+const FUNIL_STAGES: {
+  key: LeadEtapa;
+  label: string;
+  metaConv: number | null;
+  metaPct: number;
+  color: string;
+}[] = [
+  { key: 'lead',        label: 'Lead',             metaConv: null, metaPct: 100, color: '#6b7280' },
+  { key: 'qualificado', label: 'Lead Qualificado', metaConv: 40,   metaPct: 40,  color: '#3b82f6' },
+  { key: 'proposta',    label: 'Reunião Agendada', metaConv: 30,   metaPct: 12,  color: '#eab308' },
+  { key: 'negociacao',  label: 'Reunião Feita',    metaConv: 75,   metaPct: 9,   color: '#f97316' },
+  { key: 'fechado',     label: 'Fechamento',       metaConv: 33.3, metaPct: 3,   color: '#22c55e' },
+];
+
+function FunnelChart({ leads }: { leads: Lead[] }) {
+  const [tooltip, setTooltip] = useState<number | null>(null);
+
+  const counts = FUNIL_STAGES.map(s => leads.filter(l => l.etapa === s.key).length);
+  const baseReal = counts[0] || 1;
+
+  return (
+    <div className="bg-surface border border-border rounded-card p-5 mb-5">
+      {/* Header */}
+      <div className="flex items-start justify-between mb-5">
+        <div>
+          <h3 className="text-white font-semibold">Funil de Conversão</h3>
+          <p className="text-gray-500 text-xs mt-0.5">Real vs Meta · sincronizado com o kanban</p>
+        </div>
+        {/* Legend */}
+        <div className="flex items-center gap-5 text-xs text-gray-500">
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block w-4 h-2.5 rounded-sm bg-gradient-to-r from-[#0087f0] to-[#01c2f0]" />
+            Real
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block w-4 h-2.5 rounded-sm border-2 border-dashed border-gray-500" />
+            Meta
+          </span>
+        </div>
+      </div>
+
+      {/* Bars */}
+      <div className="space-y-3">
+        {FUNIL_STAGES.map((stage, i) => {
+          const count      = counts[i];
+          const prevCount  = i > 0 ? counts[i - 1] : null;
+          const realConv   = prevCount != null
+            ? (prevCount > 0 ? +(count / prevCount * 100).toFixed(1) : 0)
+            : null;
+          const realPct    = +(count / baseReal * 100).toFixed(1);   // % vs topo real
+          const metaPct    = stage.metaPct;                           // % vs topo meta
+          const aboveMeta  = realConv != null && stage.metaConv != null && realConv >= stage.metaConv;
+          const isTooltip  = tooltip === i;
+
+          return (
+            <div
+              key={stage.key}
+              className="relative"
+              onMouseEnter={() => setTooltip(i)}
+              onMouseLeave={() => setTooltip(null)}
+            >
+              {/* Row label + rate */}
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-gray-300 w-36 flex-shrink-0">{stage.label}</span>
+                  <span className="text-sm font-bold text-white">{count}</span>
+                  {realConv != null && (
+                    <span className={`text-xs font-semibold ${aboveMeta ? 'text-green-400' : 'text-red-400'}`}>
+                      {aboveMeta ? '✅' : '❌'} {realConv}%
+                    </span>
+                  )}
+                </div>
+                {stage.metaConv != null && (
+                  <span className="text-[10px] text-gray-600">
+                    meta: {stage.metaConv}%
+                  </span>
+                )}
+              </div>
+
+              {/* Bar track */}
+              <div className="relative h-6 bg-bg rounded-input overflow-hidden">
+                {/* Meta bar — dashed outline */}
+                <div
+                  className="absolute inset-y-0 left-0 border-2 border-dashed border-gray-500/60 rounded-input transition-all duration-500"
+                  style={{ width: `${metaPct}%` }}
+                />
+                {/* Real bar — solid gradient fill */}
+                <div
+                  className="absolute inset-y-0 left-0 rounded-input transition-all duration-700"
+                  style={{
+                    width: `${realPct}%`,
+                    background: `linear-gradient(90deg, ${stage.color}cc, ${stage.color})`,
+                  }}
+                />
+                {/* Inline % label */}
+                {realPct > 8 && (
+                  <span className="absolute inset-y-0 left-2 flex items-center text-[10px] font-semibold text-white/80 select-none">
+                    {realPct}%
+                  </span>
+                )}
+              </div>
+
+              {/* Tooltip */}
+              {isTooltip && (
+                <div className="absolute left-40 top-0 z-20 bg-gray-900 border border-border rounded-input px-3 py-2 text-xs shadow-xl whitespace-nowrap">
+                  <p className="text-white font-semibold mb-1">{stage.label}</p>
+                  <p className="text-gray-400">Leads: <span className="text-white">{count}</span></p>
+                  <p className="text-gray-400">% do topo real: <span className="text-white">{realPct}%</span></p>
+                  {realConv != null && (
+                    <>
+                      <p className="text-gray-400">Conversão real: <span className={aboveMeta ? 'text-green-400' : 'text-red-400'}>{realConv}%</span></p>
+                      <p className="text-gray-400">Conversão meta: <span className="text-white">{stage.metaConv}%</span></p>
+                      <p className={`font-semibold mt-1 ${aboveMeta ? 'text-green-400' : 'text-red-400'}`}>
+                        {aboveMeta ? '✅ Acima da meta' : '❌ Abaixo da meta'}
+                      </p>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Summary row */}
+      <div className="mt-5 pt-4 border-t border-border grid grid-cols-5 gap-2">
+        {FUNIL_STAGES.map((stage, i) => {
+          const count     = counts[i];
+          const prevCount = i > 0 ? counts[i - 1] : null;
+          const realConv  = prevCount != null
+            ? (prevCount > 0 ? +(count / prevCount * 100).toFixed(1) : 0)
+            : null;
+          const above = realConv != null && stage.metaConv != null && realConv >= stage.metaConv;
+          return (
+            <div key={stage.key} className="bg-bg border border-border rounded-input p-2.5 text-center">
+              <p className="text-[10px] text-gray-500 truncate">{stage.label}</p>
+              <p className="text-lg font-bold text-white mt-0.5">{count}</p>
+              {realConv != null
+                ? <p className={`text-xs font-semibold ${above ? 'text-green-400' : 'text-red-400'}`}>{realConv}%</p>
+                : <p className="text-xs text-gray-600">—</p>
+              }
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Helpers ───────────────────────────────────────────────────────────────── */
 const BLANK: Omit<Lead, 'id'> = {
   nome: '', empresa: '', whatsapp: '', email: '', etapa: 'lead',
   produtoId: '', produtoNome: '', valor: 0, dataCriacao: new Date().toISOString().slice(0, 10), notas: '',
@@ -30,6 +184,7 @@ function fmt(n: number) {
   return `R$${n}`;
 }
 
+/* ─── Page ──────────────────────────────────────────────────────────────────── */
 export default function CRM() {
   const { data, dispatch } = useData();
   const { showToast } = useToast();
@@ -37,8 +192,14 @@ export default function CRM() {
   const [editLead, setEditLead] = useState<Lead | null>(null);
   const [form, setForm] = useState<Omit<Lead, 'id'>>(BLANK);
 
-  const openNew = () => { setEditLead(null); setForm(BLANK); setDrawerOpen(true); };
-  const openEdit = (l: Lead) => { setEditLead(l); setForm({ nome: l.nome, empresa: l.empresa, whatsapp: l.whatsapp, email: l.email, etapa: l.etapa, produtoId: l.produtoId, produtoNome: l.produtoNome, valor: l.valor, dataCriacao: l.dataCriacao, notas: l.notas }); setDrawerOpen(true); };
+  const openNew  = () => { setEditLead(null); setForm(BLANK); setDrawerOpen(true); };
+  const openEdit = (l: Lead) => {
+    setEditLead(l);
+    setForm({ nome: l.nome, empresa: l.empresa, whatsapp: l.whatsapp, email: l.email,
+              etapa: l.etapa, produtoId: l.produtoId, produtoNome: l.produtoNome,
+              valor: l.valor, dataCriacao: l.dataCriacao, notas: l.notas });
+    setDrawerOpen(true);
+  };
 
   const handleSave = () => {
     if (!form.nome) { showToast('Informe o nome'); return; }
@@ -53,26 +214,36 @@ export default function CRM() {
   };
 
   const moveEtapa = (lead: Lead, dir: 'prev' | 'next') => {
-    const idx = ETAPAS.findIndex(e => e.key === lead.etapa);
+    const idx    = ETAPAS.findIndex(e => e.key === lead.etapa);
     const newIdx = dir === 'next' ? idx + 1 : idx - 1;
     if (newIdx < 0 || newIdx >= ETAPAS.length) return;
     dispatch({ type: 'UPDATE_LEAD', payload: { ...lead, etapa: ETAPAS[newIdx].key } });
   };
 
-  const totalPipeline = data.leads.filter(l => l.etapa !== 'perdido' && l.etapa !== 'fechado').reduce((s, l) => s + l.valor, 0);
+  const totalPipeline = data.leads
+    .filter(l => l.etapa !== 'perdido' && l.etapa !== 'fechado')
+    .reduce((s, l) => s + l.valor, 0);
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      {/* Page header */}
+      <div className="flex items-center justify-between mb-5">
         <div>
           <h1 className="text-2xl font-bold text-white">CRM — Pipeline</h1>
-          <p className="text-gray-500 text-sm">Pipeline total: <span className="text-primary font-semibold">{fmt(totalPipeline)}</span></p>
+          <p className="text-gray-500 text-sm">
+            Pipeline total: <span className="text-primary font-semibold">{fmt(totalPipeline)}</span>
+          </p>
         </div>
-        <button onClick={openNew}
-          className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-input text-sm font-medium">
+        <button
+          onClick={openNew}
+          className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-input text-sm font-medium"
+        >
           <Plus size={14} /> Novo Lead
         </button>
       </div>
+
+      {/* Funnel chart */}
+      <FunnelChart leads={data.leads} />
 
       {/* Kanban board */}
       <div className="grid grid-cols-6 gap-3">
@@ -80,82 +251,94 @@ export default function CRM() {
           const leads = data.leads.filter(l => l.etapa === etapa.key);
           const total = leads.reduce((s, l) => s + l.valor, 0);
           return (
-            <div key={etapa.key} className={`bg-surface border rounded-card flex flex-col max-h-[calc(100vh-220px)] ${etapa.color}`}>
+            <div
+              key={etapa.key}
+              className={`bg-surface border rounded-card flex flex-col max-h-[calc(100vh-220px)] ${etapa.color}`}
+            >
+              {/* Column header */}
               <div className="p-3 border-b border-border flex-shrink-0">
                 <div className="flex items-center justify-between">
-                  <span className={`text-xs font-semibold uppercase tracking-wide ${ETAPA_TEXT[etapa.key]}`}>{etapa.label}</span>
-                  <span className="text-xs bg-bg border border-border rounded-full px-2 py-0.5 text-gray-400">{leads.length}</span>
+                  <span className={`text-xs font-semibold uppercase tracking-wide ${ETAPA_TEXT[etapa.key]}`}>
+                    {etapa.label}
+                  </span>
+                  <span className="text-xs bg-bg border border-border rounded-full px-2 py-0.5 text-gray-400">
+                    {leads.length}
+                  </span>
                 </div>
                 {total > 0 && <p className="text-xs text-gray-600 mt-0.5">{fmt(total)}</p>}
               </div>
 
+              {/* Cards */}
               <div className="flex-1 min-h-0 p-2 flex flex-col gap-2 overflow-y-auto">
                 {leads.map(lead => (
-                  <div key={lead.id}
+                  <div
+                    key={lead.id}
                     onClick={() => openEdit(lead)}
-                    className="bg-bg border border-border rounded-input p-3 cursor-pointer hover:border-primary/40 transition-all group">
+                    className="bg-bg border border-border rounded-input p-3 cursor-pointer hover:border-primary/40 transition-all group"
+                  >
                     <p className="text-white text-xs font-semibold truncate">{lead.nome}</p>
                     <p className="text-gray-500 text-[10px] truncate mt-0.5">{lead.empresa}</p>
                     {lead.produtoNome && (
-                      <span className="inline-block mt-1.5 text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">{lead.produtoNome.split(' ')[0]}</span>
+                      <span className="inline-block mt-1.5 text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
+                        {lead.produtoNome.split(' ')[0]}
+                      </span>
                     )}
-                    {lead.valor > 0 && <p className="text-primary text-xs font-semibold mt-1">{fmt(lead.valor)}</p>}
+                    {lead.valor > 0 && (
+                      <p className="text-primary text-xs font-semibold mt-1">{fmt(lead.valor)}</p>
+                    )}
 
                     <div className="flex items-center justify-between mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <div className="flex gap-1">
-                        <button onClick={e => { e.stopPropagation(); moveEtapa(lead, 'prev'); }}
-                          className="p-1 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors">
+                        <button
+                          onClick={e => { e.stopPropagation(); moveEtapa(lead, 'prev'); }}
+                          className="p-1 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors"
+                        >
                           <ChevronLeft size={12} />
                         </button>
-                        <button onClick={e => { e.stopPropagation(); moveEtapa(lead, 'next'); }}
-                          className="p-1 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors">
+                        <button
+                          onClick={e => { e.stopPropagation(); moveEtapa(lead, 'next'); }}
+                          className="p-1 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors"
+                        >
                           <ChevronRight size={12} />
                         </button>
                       </div>
                       <div className="flex gap-1">
                         {lead.whatsapp && (
-                          <a href={`https://wa.me/${lead.whatsapp}`} target="_blank" rel="noopener noreferrer"
+                          <a
+                            href={`https://wa.me/${lead.whatsapp}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             onClick={e => e.stopPropagation()}
-                            className="p-1 hover:bg-green-500/20 rounded text-gray-400 hover:text-green-400 transition-colors">
+                            className="p-1 hover:bg-green-500/20 rounded text-gray-400 hover:text-green-400 transition-colors"
+                          >
                             <MessageCircle size={12} />
                           </a>
                         )}
-                        <button onClick={e => { e.stopPropagation(); dispatch({ type: 'DELETE_LEAD', payload: lead.id }); showToast('Lead excluído'); }}
-                          className="p-1 hover:bg-red-500/20 rounded text-gray-400 hover:text-red-400 transition-colors">
+                        <button
+                          onClick={e => {
+                            e.stopPropagation();
+                            dispatch({ type: 'DELETE_LEAD', payload: lead.id });
+                            showToast('Lead excluído');
+                          }}
+                          className="p-1 hover:bg-red-500/20 rounded text-gray-400 hover:text-red-400 transition-colors"
+                        >
                           <Trash2 size={12} />
                         </button>
                       </div>
                     </div>
                   </div>
                 ))}
-                <button onClick={openNew}
-                  className="text-[10px] text-gray-600 hover:text-primary transition-colors py-1 flex items-center gap-1 justify-center border border-dashed border-border rounded-input hover:border-primary/30">
+
+                <button
+                  onClick={openNew}
+                  className="text-[10px] text-gray-600 hover:text-primary transition-colors py-1 flex items-center gap-1 justify-center border border-dashed border-border rounded-input hover:border-primary/30"
+                >
                   <Plus size={10} /> Lead
                 </button>
               </div>
             </div>
           );
         })}
-      </div>
-
-      {/* Conversion stats below */}
-      <div className="mt-6 bg-surface border border-border rounded-card p-5">
-        <h3 className="text-white font-semibold mb-4">Taxas de Conversão por Etapa</h3>
-        <div className="grid grid-cols-4 gap-4">
-          {ETAPAS.slice(0, -1).map((e, i) => {
-            const curr = data.leads.filter(l => l.etapa === ETAPAS[i].key).length;
-            const next = data.leads.filter(l => l.etapa === ETAPAS[i + 1].key).length;
-            const totalEtapa = curr + next;
-            const taxa = totalEtapa > 0 ? +(next / totalEtapa * 100).toFixed(1) : 0;
-            return (
-              <div key={e.key} className="bg-bg border border-border rounded-input p-3">
-                <p className="text-xs text-gray-500">{e.label} → {ETAPAS[i + 1].label}</p>
-                <p className={`text-xl font-bold mt-1 ${taxa >= 50 ? 'text-green-400' : taxa >= 25 ? 'text-yellow-400' : 'text-red-400'}`}>{taxa}%</p>
-                <p className="text-xs text-gray-600">{next} de {curr + next}</p>
-              </div>
-            );
-          })}
-        </div>
       </div>
 
       {/* Drawer */}
@@ -166,17 +349,24 @@ export default function CRM() {
         <FormField label="E-mail" value={form.email} onChange={v => setForm(f => ({ ...f, email: v }))} />
         <div className="mb-4">
           <label className="block text-xs text-gray-400 mb-1">Etapa</label>
-          <select value={form.etapa}
+          <select
+            value={form.etapa}
             onChange={e => setForm(f => ({ ...f, etapa: e.target.value as LeadEtapa }))}
-            className="w-full bg-bg border border-border rounded-input px-3 py-2 text-white text-sm focus:outline-none focus:border-primary">
+            className="w-full bg-bg border border-border rounded-input px-3 py-2 text-white text-sm focus:outline-none focus:border-primary"
+          >
             {ETAPAS.map(e => <option key={e.key} value={e.key}>{e.label}</option>)}
           </select>
         </div>
         <div className="mb-4">
           <label className="block text-xs text-gray-400 mb-1">Produto de Interesse</label>
-          <select value={form.produtoId}
-            onChange={e => { const p = data.produtos.find(x => x.id === e.target.value); setForm(f => ({ ...f, produtoId: e.target.value, produtoNome: p?.nome || '' })); }}
-            className="w-full bg-bg border border-border rounded-input px-3 py-2 text-white text-sm focus:outline-none focus:border-primary">
+          <select
+            value={form.produtoId}
+            onChange={e => {
+              const p = data.produtos.find(x => x.id === e.target.value);
+              setForm(f => ({ ...f, produtoId: e.target.value, produtoNome: p?.nome || '' }));
+            }}
+            className="w-full bg-bg border border-border rounded-input px-3 py-2 text-white text-sm focus:outline-none focus:border-primary"
+          >
             <option value="">Selecione</option>
             {data.produtos.map(p => <option key={p.id} value={p.id}>{p.nome}</option>)}
           </select>
@@ -184,12 +374,20 @@ export default function CRM() {
         <FormField label="Valor Estimado (R$)" value={form.valor} type="number" onChange={v => setForm(f => ({ ...f, valor: +v }))} />
         <div className="mb-4">
           <label className="block text-xs text-gray-400 mb-1">Notas</label>
-          <textarea value={form.notas} onChange={e => setForm(f => ({ ...f, notas: e.target.value }))} rows={3}
-            className="w-full bg-bg border border-border rounded-input px-3 py-2 text-white text-sm focus:outline-none focus:border-primary resize-none" />
+          <textarea
+            value={form.notas}
+            onChange={e => setForm(f => ({ ...f, notas: e.target.value }))}
+            rows={3}
+            className="w-full bg-bg border border-border rounded-input px-3 py-2 text-white text-sm focus:outline-none focus:border-primary resize-none"
+          />
         </div>
         <div className="flex gap-3 pt-4 border-t border-border mt-2">
-          <button onClick={handleSave} className="flex-1 bg-primary hover:bg-primary/90 text-white rounded-input py-2 text-sm font-medium">Salvar</button>
-          <button onClick={() => setDrawerOpen(false)} className="flex-1 bg-bg text-gray-400 border border-border rounded-input py-2 text-sm">Cancelar</button>
+          <button onClick={handleSave} className="flex-1 bg-primary hover:bg-primary/90 text-white rounded-input py-2 text-sm font-medium">
+            Salvar
+          </button>
+          <button onClick={() => setDrawerOpen(false)} className="flex-1 bg-bg text-gray-400 border border-border rounded-input py-2 text-sm">
+            Cancelar
+          </button>
         </div>
       </Drawer>
     </div>
