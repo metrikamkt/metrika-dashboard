@@ -242,9 +242,6 @@ export default function CRM() {
         </button>
       </div>
 
-      {/* Funnel chart */}
-      <FunnelChart leads={data.leads} />
-
       {/* Kanban board */}
       <div className="grid grid-cols-6 gap-3">
         {ETAPAS.map(etapa => {
@@ -339,6 +336,11 @@ export default function CRM() {
             </div>
           );
         })}
+      </div>
+
+      {/* Funnel chart */}
+      <div className="mt-5">
+        <FunnelChart leads={data.leads} />
       </div>
 
       {/* Drawer */}
