@@ -8,7 +8,7 @@ import { csvLeads } from '../data/csvLeads';
 export default function Perfil() {
   const { user, profile, updateUserProfile, isAdmin } = useAuth();
   const { showToast } = useToast();
-  const { migrateFromLocalStorage, dispatch } = useData();
+  const { migrateFromLocalStorage, dispatch, forceWrite } = useData();
   const fileRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [migrating, setMigrating] = useState(false);
@@ -186,12 +186,20 @@ export default function Perfil() {
             <button
               onClick={async () => {
                 setImportingLeads(true);
-                csvLeads.forEach((lead, i) => {
-                  dispatch({ type: 'ADD_LEAD', payload: { ...lead, id: `csv_${Date.now()}_${i}` } });
-                });
-                await new Promise(r => setTimeout(r, 1000));
-                setImportingLeads(false);
-                showToast(`${csvLeads.length} leads importados com sucesso!`);
+                try {
+                  const base = Date.now();
+                  csvLeads.forEach((lead, i) => {
+                    dispatch({ type: 'ADD_LEAD', payload: { ...lead, id: `csv_${base}_${i}` } });
+                  });
+                  // Wait one tick for reducer to accumulate all dispatches, then force-write
+                  await new Promise(r => setTimeout(r, 100));
+                  await forceWrite();
+                  showToast(`${csvLeads.length} leads importados e salvos com sucesso!`);
+                } catch {
+                  showToast('Erro ao importar leads');
+                } finally {
+                  setImportingLeads(false);
+                }
               }}
               disabled={importingLeads}
               className="w-full flex items-center justify-center gap-2 py-2 bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary rounded-input text-sm font-medium transition-colors disabled:opacity-60"

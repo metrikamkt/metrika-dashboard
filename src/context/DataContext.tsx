@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useState, useCallback, useRef } from 'react';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from './AuthContext';
@@ -71,23 +71,36 @@ interface DataContextType {
   isAdmin: boolean;
   loaded: boolean;
   migrateFromLocalStorage: () => Promise<boolean>;
+  forceWrite: () => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | null>(null);
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const [data, dispatch] = useReducer(reducer, defaultData);
+  const [data, dispatchRaw] = useReducer(reducer, defaultData);
   const [loaded, setLoaded] = useState(false);
-  const [syncing, setSyncing] = useState(false);
+
+  // pendingWrite: true when the user made local changes not yet confirmed by Firestore.
+  // While true, we block LOAD from Firestore so the snapshot from our own write
+  // doesn't overwrite still-pending in-memory state (e.g. bulk lead imports).
+  const pendingWrite = useRef(false);
+  const writeInProgress = useRef(false);
+  // dataRef always holds latest data so forceWrite can access it without stale closure
+  const dataRef = useRef(data);
+  useEffect(() => { dataRef.current = data; }, [data]);
 
   const isAdmin = user?.email === ADMIN_EMAIL;
 
-  // Load from Firestore and listen for real-time updates
+  // Load from Firestore and listen for real-time updates.
+  // Only applies LOAD when there are no pending local writes to avoid overwriting
+  // in-flight data (e.g. during bulk imports or rapid edits).
   useEffect(() => {
     const unsub = onSnapshot(FIRESTORE_DOC, async (snap) => {
       if (snap.exists()) {
-        dispatch({ type: 'LOAD', payload: snap.data() as MetrikaData });
+        if (!pendingWrite.current) {
+          dispatchRaw({ type: 'LOAD', payload: snap.data() as MetrikaData });
+        }
       } else if (isAdmin) {
         await setDoc(FIRESTORE_DOC, defaultData);
       }
@@ -96,24 +109,46 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     return unsub;
   }, [isAdmin]);
 
-  // Write to Firestore after state changes (admin only, debounced)
+  // Write to Firestore after user-triggered state changes (admin only, debounced).
+  // Only runs when pendingWrite is true — i.e. the user (not Firestore) changed the data.
   useEffect(() => {
-    if (!loaded || !isAdmin || syncing) return;
+    if (!loaded || !isAdmin || !pendingWrite.current) return;
     const timer = setTimeout(async () => {
-      setSyncing(true);
+      if (!pendingWrite.current || writeInProgress.current) return;
+      writeInProgress.current = true;
       try {
         await setDoc(FIRESTORE_DOC, data);
+        // Successful write: clear the flag so the next onSnapshot can LOAD freely
+        pendingWrite.current = false;
+      } catch (err) {
+        console.error('Firestore write failed:', err);
+        // keep pendingWrite = true so it retries on next data change
       } finally {
-        setSyncing(false);
+        writeInProgress.current = false;
       }
     }, 800);
     return () => clearTimeout(timer);
   }, [data, loaded, isAdmin]);
 
-  // Block writes for non-admins
+  // safeDispatch: blocks writes for non-admins, marks pending write for admins
   const safeDispatch = useCallback((action: Action) => {
     if (action.type !== 'LOAD' && !isAdmin) return;
-    dispatch(action);
+    if (action.type !== 'LOAD') {
+      pendingWrite.current = true;
+    }
+    dispatchRaw(action);
+  }, [isAdmin]);
+
+  // Force an immediate Firestore write with current data (used after bulk imports)
+  const forceWrite = useCallback(async () => {
+    if (!isAdmin) return;
+    writeInProgress.current = true;
+    try {
+      await setDoc(FIRESTORE_DOC, dataRef.current);
+      pendingWrite.current = false;
+    } finally {
+      writeInProgress.current = false;
+    }
   }, [isAdmin]);
 
   // One-time migration from localStorage to Firestore
@@ -124,7 +159,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     try {
       const parsed = JSON.parse(stored) as MetrikaData;
       await setDoc(FIRESTORE_DOC, parsed);
-      dispatch({ type: 'LOAD', payload: parsed });
+      pendingWrite.current = false;
+      dispatchRaw({ type: 'LOAD', payload: parsed });
       return true;
     } catch {
       return false;
@@ -132,7 +168,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   }, [isAdmin]);
 
   return (
-    <DataContext.Provider value={{ data, dispatch: safeDispatch, isAdmin, loaded, migrateFromLocalStorage }}>
+    <DataContext.Provider value={{ data, dispatch: safeDispatch, isAdmin, loaded, migrateFromLocalStorage, forceWrite }}>
       {children}
     </DataContext.Provider>
   );
