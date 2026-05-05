@@ -74,13 +74,13 @@ export default function CRM() {
         </button>
       </div>
 
-      {/* Kanban board — fixed height so columns scroll internally */}
-      <div className="grid grid-cols-6 gap-3 h-[calc(100vh-13rem)]">
+      {/* Kanban board */}
+      <div className="grid grid-cols-6 gap-3">
         {ETAPAS.map(etapa => {
           const leads = data.leads.filter(l => l.etapa === etapa.key);
           const total = leads.reduce((s, l) => s + l.valor, 0);
           return (
-            <div key={etapa.key} className={`bg-surface border rounded-card flex flex-col h-full ${etapa.color}`}>
+            <div key={etapa.key} className={`bg-surface border rounded-card flex flex-col max-h-[calc(100vh-220px)] ${etapa.color}`}>
               <div className="p-3 border-b border-border flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <span className={`text-xs font-semibold uppercase tracking-wide ${ETAPA_TEXT[etapa.key]}`}>{etapa.label}</span>
