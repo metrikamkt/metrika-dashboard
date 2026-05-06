@@ -55,12 +55,18 @@ export default function Dashboard() {
   const lFiltered = filterLancamentos(data.lancamentos, period) as typeof data.lancamentos;
   const totalFat = lFiltered.reduce((s, l) => s + l.valor, 0);
 
-  const novosClientes = data.clientes.filter(c => {
-    const d = new Date(c.dataCadastro);
+  const isInPeriod = (dateStr: string) => {
+    const d = new Date(dateStr);
     if (period === 'mes') return d.getMonth() + 1 === NOW_MES && d.getFullYear() === NOW_ANO;
     if (period === 'trimestre') return d.getFullYear() === NOW_ANO && d.getMonth() + 1 >= NOW_MES - 2 && d.getMonth() + 1 <= NOW_MES;
     return d.getFullYear() === NOW_ANO;
-  }).length;
+  };
+
+  // Count both: clients manually registered + CRM leads that reached fechamento in the period
+  // Use the CRM fechamentos count if it's greater (CRM is the primary sales signal)
+  const novosClientesCadastros = data.clientes.filter(c => isInPeriod(c.dataCadastro)).length;
+  const novosClientesCRM = data.leads.filter(l => l.etapa === 'fechado' && isInPeriod(l.dataCriacao)).length;
+  const novosClientes = Math.max(novosClientesCadastros, novosClientesCRM);
 
   const totalAtivos = data.clientes.filter(c => c.status === 'ativo').length;
   const custosFiltrados = filterLancamentos(data.custos, period) as typeof data.custos;
