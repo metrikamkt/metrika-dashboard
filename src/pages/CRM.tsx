@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useData } from '../context/DataContext';
 import { useToast } from '../context/ToastContext';
 import { Drawer } from '../components/layout/Drawer';
@@ -190,6 +190,8 @@ export default function CRM() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editLead, setEditLead] = useState<Lead | null>(null);
   const [form, setForm] = useState<Omit<Lead, 'id'>>(BLANK);
+  const [currentCol, setCurrentCol] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const openNew  = () => { setEditLead(null); setForm(BLANK); setDrawerOpen(true); };
   const openEdit = (l: Lead) => {
@@ -219,9 +221,60 @@ export default function CRM() {
     dispatch({ type: 'UPDATE_LEAD', payload: { ...lead, etapa: ETAPAS[newIdx].key } });
   };
 
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    const { scrollLeft, offsetWidth } = scrollRef.current;
+    setCurrentCol(Math.round(scrollLeft / offsetWidth));
+  };
+
   const totalPipeline = data.leads
     .filter(l => l.etapa !== 'perdido' && l.etapa !== 'fechado')
     .reduce((s, l) => s + l.valor, 0);
+
+  // Shared lead card renderer
+  const LeadCard = ({ lead }: { lead: Lead }) => (
+    <div
+      key={lead.id}
+      onClick={() => openEdit(lead)}
+      className="bg-bg border border-border rounded-input p-3 cursor-pointer active:border-primary/60 hover:border-primary/40 transition-all"
+    >
+      <p className="text-white text-sm font-semibold truncate">{lead.nome}</p>
+      <p className="text-gray-500 text-xs truncate mt-0.5">{lead.empresa}</p>
+      {lead.produtoNome && (
+        <span className="inline-block mt-1.5 text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
+          {lead.produtoNome.split(' ')[0]}
+        </span>
+      )}
+      {lead.valor > 0 && (
+        <p className="text-primary text-xs font-semibold mt-1">{fmt(lead.valor)}</p>
+      )}
+      <div className="flex items-center justify-between mt-2">
+        <div className="flex gap-1">
+          <button onClick={e => { e.stopPropagation(); moveEtapa(lead, 'prev'); }}
+            className="p-1.5 hover:bg-white/10 rounded text-gray-500 hover:text-white transition-colors">
+            <ChevronLeft size={13} />
+          </button>
+          <button onClick={e => { e.stopPropagation(); moveEtapa(lead, 'next'); }}
+            className="p-1.5 hover:bg-white/10 rounded text-gray-500 hover:text-white transition-colors">
+            <ChevronRight size={13} />
+          </button>
+        </div>
+        <div className="flex gap-1">
+          {lead.whatsapp && (
+            <a href={`https://wa.me/${lead.whatsapp}`} target="_blank" rel="noopener noreferrer"
+              onClick={e => e.stopPropagation()}
+              className="p-1.5 hover:bg-green-500/20 rounded text-gray-500 hover:text-green-400 transition-colors">
+              <MessageCircle size={13} />
+            </a>
+          )}
+          <button onClick={e => { e.stopPropagation(); dispatch({ type: 'DELETE_LEAD', payload: lead.id }); showToast('Lead excluído'); }}
+            className="p-1.5 hover:bg-red-500/20 rounded text-gray-500 hover:text-red-400 transition-colors">
+            <Trash2 size={13} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div>
@@ -230,119 +283,105 @@ export default function CRM() {
         <div>
           <h1 className="text-2xl font-bold text-white">CRM — Pipeline</h1>
           <p className="text-gray-500 text-sm">
-            Pipeline total: <span className="text-primary font-semibold">{fmt(totalPipeline)}</span>
+            Pipeline: <span className="text-primary font-semibold">{fmt(totalPipeline)}</span>
           </p>
         </div>
-        <button
-          onClick={openNew}
-          className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-input text-sm font-medium"
-        >
+        <button onClick={openNew}
+          className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-input text-sm font-medium">
           <Plus size={14} /> Novo Lead
         </button>
       </div>
 
-      {/* Kanban board — Trello-style snap scroll on mobile, grid on desktop */}
-      <div className="overflow-x-scroll snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible md:snap-none pb-2">
-        <div className="flex gap-3 md:grid md:grid-cols-6">
+      {/* ── MOBILE KANBAN — full-width swipe, one column at a time ── */}
+      <div className="md:hidden">
+        {/* Etapa indicator */}
+        <div className="flex items-center justify-between mb-2 px-0.5">
+          <span className={`text-xs font-semibold uppercase tracking-wide ${ETAPA_TEXT[ETAPAS[currentCol].key]}`}>
+            {ETAPAS[currentCol].label}
+          </span>
+          <span className="text-xs text-gray-500">{currentCol + 1} / {ETAPAS.length}</span>
+        </div>
+
+        {/* Scroll container — exactly the width of the page content area, no overflow */}
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex overflow-x-scroll snap-x snap-mandatory rounded-card"
+          style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+        >
+          {ETAPAS.map(etapa => {
+            const colLeads = data.leads.filter(l => l.etapa === etapa.key);
+            const colTotal = colLeads.reduce((s, l) => s + l.valor, 0);
+            return (
+              <div
+                key={etapa.key}
+                className={`snap-start flex-shrink-0 bg-surface border rounded-card flex flex-col ${etapa.color}`}
+                style={{ minWidth: '100%', height: 'calc(100svh - 240px)' }}
+              >
+                {/* Column header */}
+                <div className="px-4 py-3 border-b border-border flex-shrink-0 flex items-center justify-between">
+                  <div>
+                    <p className={`text-xs font-bold uppercase tracking-wide ${ETAPA_TEXT[etapa.key]}`}>{etapa.label}</p>
+                    {colTotal > 0 && <p className="text-[10px] text-gray-600 mt-0.5">{fmt(colTotal)}</p>}
+                  </div>
+                  <span className="text-xs bg-bg border border-border rounded-full px-2.5 py-0.5 text-gray-400 font-semibold">
+                    {colLeads.length}
+                  </span>
+                </div>
+                {/* Cards — scrollable vertically */}
+                <div className="flex-1 min-h-0 overflow-y-auto p-3 flex flex-col gap-2">
+                  {colLeads.map(lead => <LeadCard key={lead.id} lead={lead} />)}
+                  <button onClick={openNew}
+                    className="mt-1 text-xs text-gray-600 hover:text-primary transition-colors py-2 flex items-center gap-1 justify-center border border-dashed border-border rounded-input hover:border-primary/30">
+                    <Plus size={11} /> Adicionar lead
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Pagination dots */}
+        <div className="flex justify-center items-center gap-1.5 py-3">
+          {ETAPAS.map((e, i) => (
+            <button
+              key={e.key}
+              onClick={() => scrollRef.current?.scrollTo({ left: i * scrollRef.current.offsetWidth, behavior: 'smooth' })}
+              className={`rounded-full transition-all duration-300 ${i === currentCol ? 'w-5 h-1.5 bg-primary' : 'w-1.5 h-1.5 bg-gray-700'}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* ── DESKTOP KANBAN — 6-column grid ── */}
+      <div className="hidden md:grid md:grid-cols-6 gap-3 mb-5">
         {ETAPAS.map(etapa => {
           const leads = data.leads.filter(l => l.etapa === etapa.key);
           const total = leads.reduce((s, l) => s + l.valor, 0);
           return (
-            <div
-              key={etapa.key}
-              className={`snap-start flex-shrink-0 w-[calc(100vw-3rem)] md:w-auto md:flex-shrink bg-surface border rounded-card flex flex-col max-h-[calc(100vh-220px)] ${etapa.color}`}
-            >
-              {/* Column header */}
+            <div key={etapa.key}
+              className={`bg-surface border rounded-card flex flex-col max-h-[calc(100vh-220px)] ${etapa.color}`}>
               <div className="p-3 border-b border-border flex-shrink-0">
                 <div className="flex items-center justify-between">
-                  <span className={`text-xs font-semibold uppercase tracking-wide ${ETAPA_TEXT[etapa.key]}`}>
-                    {etapa.label}
-                  </span>
-                  <span className="text-xs bg-bg border border-border rounded-full px-2 py-0.5 text-gray-400">
-                    {leads.length}
-                  </span>
+                  <span className={`text-xs font-semibold uppercase tracking-wide ${ETAPA_TEXT[etapa.key]}`}>{etapa.label}</span>
+                  <span className="text-xs bg-bg border border-border rounded-full px-2 py-0.5 text-gray-400">{leads.length}</span>
                 </div>
                 {total > 0 && <p className="text-xs text-gray-600 mt-0.5">{fmt(total)}</p>}
               </div>
-
-              {/* Cards */}
               <div className="flex-1 min-h-0 p-2 flex flex-col gap-2 overflow-y-auto">
-                {leads.map(lead => (
-                  <div
-                    key={lead.id}
-                    onClick={() => openEdit(lead)}
-                    className="bg-bg border border-border rounded-input p-3 cursor-pointer hover:border-primary/40 transition-all group"
-                  >
-                    <p className="text-white text-xs font-semibold truncate">{lead.nome}</p>
-                    <p className="text-gray-500 text-[10px] truncate mt-0.5">{lead.empresa}</p>
-                    {lead.produtoNome && (
-                      <span className="inline-block mt-1.5 text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
-                        {lead.produtoNome.split(' ')[0]}
-                      </span>
-                    )}
-                    {lead.valor > 0 && (
-                      <p className="text-primary text-xs font-semibold mt-1">{fmt(lead.valor)}</p>
-                    )}
-
-                    <div className="flex items-center justify-between mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="flex gap-1">
-                        <button
-                          onClick={e => { e.stopPropagation(); moveEtapa(lead, 'prev'); }}
-                          className="p-1 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors"
-                        >
-                          <ChevronLeft size={12} />
-                        </button>
-                        <button
-                          onClick={e => { e.stopPropagation(); moveEtapa(lead, 'next'); }}
-                          className="p-1 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors"
-                        >
-                          <ChevronRight size={12} />
-                        </button>
-                      </div>
-                      <div className="flex gap-1">
-                        {lead.whatsapp && (
-                          <a
-                            href={`https://wa.me/${lead.whatsapp}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={e => e.stopPropagation()}
-                            className="p-1 hover:bg-green-500/20 rounded text-gray-400 hover:text-green-400 transition-colors"
-                          >
-                            <MessageCircle size={12} />
-                          </a>
-                        )}
-                        <button
-                          onClick={e => {
-                            e.stopPropagation();
-                            dispatch({ type: 'DELETE_LEAD', payload: lead.id });
-                            showToast('Lead excluído');
-                          }}
-                          className="p-1 hover:bg-red-500/20 rounded text-gray-400 hover:text-red-400 transition-colors"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                <button
-                  onClick={openNew}
-                  className="text-[10px] text-gray-600 hover:text-primary transition-colors py-1 flex items-center gap-1 justify-center border border-dashed border-border rounded-input hover:border-primary/30"
-                >
+                {leads.map(lead => <LeadCard key={lead.id} lead={lead} />)}
+                <button onClick={openNew}
+                  className="text-[10px] text-gray-600 hover:text-primary transition-colors py-1 flex items-center gap-1 justify-center border border-dashed border-border rounded-input hover:border-primary/30">
                   <Plus size={10} /> Lead
                 </button>
               </div>
             </div>
           );
         })}
-        </div>
       </div>
 
       {/* Funnel chart */}
-      <div className="mt-5">
-        <FunnelChart leads={data.leads} />
-      </div>
+      <FunnelChart leads={data.leads} />
 
       {/* Drawer */}
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} title={editLead ? 'Editar Lead' : 'Novo Lead'}>
@@ -352,24 +391,17 @@ export default function CRM() {
         <FormField label="E-mail" value={form.email} onChange={v => setForm(f => ({ ...f, email: v }))} />
         <div className="mb-4">
           <label className="block text-xs text-gray-400 mb-1">Etapa</label>
-          <select
-            value={form.etapa}
+          <select value={form.etapa}
             onChange={e => setForm(f => ({ ...f, etapa: e.target.value as LeadEtapa }))}
-            className="w-full bg-bg border border-border rounded-input px-3 py-2 text-white text-sm focus:outline-none focus:border-primary"
-          >
+            className="w-full bg-bg border border-border rounded-input px-3 py-2 text-white text-sm focus:outline-none focus:border-primary">
             {ETAPAS.map(e => <option key={e.key} value={e.key}>{e.label}</option>)}
           </select>
         </div>
         <div className="mb-4">
           <label className="block text-xs text-gray-400 mb-1">Produto de Interesse</label>
-          <select
-            value={form.produtoId}
-            onChange={e => {
-              const p = data.produtos.find(x => x.id === e.target.value);
-              setForm(f => ({ ...f, produtoId: e.target.value, produtoNome: p?.nome || '' }));
-            }}
-            className="w-full bg-bg border border-border rounded-input px-3 py-2 text-white text-sm focus:outline-none focus:border-primary"
-          >
+          <select value={form.produtoId}
+            onChange={e => { const p = data.produtos.find(x => x.id === e.target.value); setForm(f => ({ ...f, produtoId: e.target.value, produtoNome: p?.nome || '' })); }}
+            className="w-full bg-bg border border-border rounded-input px-3 py-2 text-white text-sm focus:outline-none focus:border-primary">
             <option value="">Selecione</option>
             {data.produtos.map(p => <option key={p.id} value={p.id}>{p.nome}</option>)}
           </select>
@@ -377,20 +409,12 @@ export default function CRM() {
         <FormField label="Valor Estimado (R$)" value={form.valor} type="number" onChange={v => setForm(f => ({ ...f, valor: +v }))} />
         <div className="mb-4">
           <label className="block text-xs text-gray-400 mb-1">Notas</label>
-          <textarea
-            value={form.notas}
-            onChange={e => setForm(f => ({ ...f, notas: e.target.value }))}
-            rows={3}
-            className="w-full bg-bg border border-border rounded-input px-3 py-2 text-white text-sm focus:outline-none focus:border-primary resize-none"
-          />
+          <textarea value={form.notas} onChange={e => setForm(f => ({ ...f, notas: e.target.value }))} rows={3}
+            className="w-full bg-bg border border-border rounded-input px-3 py-2 text-white text-sm focus:outline-none focus:border-primary resize-none" />
         </div>
         <div className="flex gap-3 pt-4 border-t border-border mt-2">
-          <button onClick={handleSave} className="flex-1 bg-primary hover:bg-primary/90 text-white rounded-input py-2 text-sm font-medium">
-            Salvar
-          </button>
-          <button onClick={() => setDrawerOpen(false)} className="flex-1 bg-bg text-gray-400 border border-border rounded-input py-2 text-sm">
-            Cancelar
-          </button>
+          <button onClick={handleSave} className="flex-1 bg-primary hover:bg-primary/90 text-white rounded-input py-2 text-sm font-medium">Salvar</button>
+          <button onClick={() => setDrawerOpen(false)} className="flex-1 bg-bg text-gray-400 border border-border rounded-input py-2 text-sm">Cancelar</button>
         </div>
       </Drawer>
     </div>
