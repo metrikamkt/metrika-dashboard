@@ -76,18 +76,18 @@ export default function Financeiro() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Financeiro</h1>
-          <p className="text-gray-500 text-sm">DRE e controle de custos</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <PeriodSelector />
+      <div className="mb-6">
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Financeiro</h1>
+            <p className="text-gray-500 text-sm">DRE e controle de custos</p>
+          </div>
           <button onClick={() => { setForm(BLANK); setDrawerOpen(true); }}
-            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-input text-sm font-medium transition-all">
-            <Plus size={14} /> Registrar Custo
+            className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-input text-sm font-medium transition-all">
+            <Plus size={14} /> <span className="hidden sm:inline">Registrar </span>Custo
           </button>
         </div>
+        <PeriodSelector />
       </div>
 
       {/* KPIs */}

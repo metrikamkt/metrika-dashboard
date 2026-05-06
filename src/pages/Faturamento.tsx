@@ -78,22 +78,24 @@ export default function Faturamento() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Faturamento</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Lançamentos e receita do período</p>
+      <div className="mb-6">
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Faturamento</h1>
+            <p className="text-gray-500 text-sm mt-0.5">Lançamentos e receita do período</p>
+          </div>
+          <div className="flex gap-2 flex-shrink-0">
+            <button onClick={() => { setMetaEdit(data.metaFaturamento); setDrawerMode('metas'); }}
+              className="hidden sm:flex items-center gap-2 px-3 py-2 bg-surface border border-border rounded-input text-gray-300 text-sm hover:border-primary/40 transition-all">
+              <Target size={14} /> Metas
+            </button>
+            <button onClick={() => { setForm(BLANK); setDrawerMode('lancamento'); }}
+              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-input text-sm font-medium transition-all">
+              <Plus size={14} /> <span className="hidden sm:inline">Novo </span>Lançamento
+            </button>
+          </div>
         </div>
-        <div className="flex gap-2 items-center">
-          <PeriodSelector />
-          <button onClick={() => { setMetaEdit(data.metaFaturamento); setDrawerMode('metas'); }}
-            className="flex items-center gap-2 px-3 py-2 bg-surface border border-border rounded-input text-gray-300 text-sm hover:border-primary/40 transition-all">
-            <Target size={14} /> Metas
-          </button>
-          <button onClick={() => { setForm(BLANK); setDrawerMode('lancamento'); }}
-            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-input text-sm font-medium transition-all">
-            <Plus size={14} /> Novo Lançamento
-          </button>
-        </div>
+        <PeriodSelector />
       </div>
 
       {/* KPIs */}

@@ -11,7 +11,15 @@ function getColor(pct: number) {
   return { bar: 'from-red-500 to-red-400', text: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20' };
 }
 
-const BLANK: Omit<Meta, 'id'> = { nome: '', alvo: 100, atual: 0, responsavel: '', unidade: '' };
+const BLANK: Omit<Meta, 'id'> = { nome: '', alvo: 100, atual: 0, responsavel: '', unidade: '', source: undefined };
+
+// Returns the effective current value — auto-computed for CRM-linked metas
+function getAtual(meta: Meta, leads: { etapa: string }[]): number {
+  if (meta.source === 'crm_fechados') {
+    return leads.filter(l => l.etapa === 'fechado').length;
+  }
+  return meta.atual;
+}
 
 export default function Metas() {
   const { data, dispatch } = useData();
@@ -24,7 +32,11 @@ export default function Metas() {
   const [globalDrawer, setGlobalDrawer] = useState(false);
 
   const openNew = () => { setEditIndex(null); setForm(BLANK); setDrawerOpen(true); };
-  const openEdit = (m: Meta, i: number) => { setEditIndex(i); setForm({ nome: m.nome, alvo: m.alvo, atual: m.atual, responsavel: m.responsavel, unidade: m.unidade }); setDrawerOpen(true); };
+  const openEdit = (m: Meta, i: number) => {
+    setEditIndex(i);
+    setForm({ nome: m.nome, alvo: m.alvo, atual: m.atual, responsavel: m.responsavel, unidade: m.unidade, source: m.source });
+    setDrawerOpen(true);
+  };
 
   const handleSave = () => {
     if (!form.nome) { showToast('Informe o nome da meta'); return; }
@@ -94,14 +106,19 @@ export default function Metas() {
       {/* Metas grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {data.metas.map((meta, i) => {
-          const pct = meta.alvo > 0 ? Math.min((meta.atual / meta.alvo) * 100, 100) : 0;
+          const atual = getAtual(meta, data.leads);
+          const pct = meta.alvo > 0 ? Math.min((atual / meta.alvo) * 100, 100) : 0;
           const colors = getColor(pct);
           return (
             <div key={meta.id} className="bg-surface border border-border rounded-card p-5">
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <p className="text-white font-semibold">{meta.nome}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Resp: {meta.responsavel}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {meta.source === 'crm_fechados'
+                      ? <span className="text-primary/80">🔗 Vinculada ao CRM</span>
+                      : `Resp: ${meta.responsavel}`}
+                  </p>
                 </div>
                 <div className="flex items-center gap-1">
                   <span className={`text-lg font-bold ${colors.text}`}>{pct.toFixed(0)}%</span>
@@ -116,7 +133,7 @@ export default function Metas() {
                   style={{ width: `${pct}%` }} />
               </div>
               <div className="flex justify-between text-xs text-gray-500">
-                <span>Atual: <span className="text-white font-medium">{fmt(meta.atual, meta.unidade)}</span></span>
+                <span>Atual: <span className="text-white font-medium">{fmt(atual, meta.unidade)}</span></span>
                 <span>Meta: <span className="text-gray-300">{fmt(meta.alvo, meta.unidade)}</span></span>
               </div>
             </div>
@@ -146,10 +163,29 @@ export default function Metas() {
           </div>
           <div>
             <label className="block text-xs text-gray-400 mb-1">Valor Atual</label>
-            <input type="number" value={form.atual} onChange={e => setForm(f => ({ ...f, atual: +e.target.value }))}
-              className="w-full bg-bg border border-border rounded-input px-3 py-2 text-white text-sm focus:outline-none focus:border-primary" />
+            <input type="number" value={form.atual}
+              disabled={form.source === 'crm_fechados'}
+              onChange={e => setForm(f => ({ ...f, atual: +e.target.value }))}
+              className="w-full bg-bg border border-border rounded-input px-3 py-2 text-white text-sm focus:outline-none focus:border-primary disabled:opacity-40 disabled:cursor-not-allowed" />
           </div>
         </div>
+
+        {/* CRM link toggle */}
+        <div className="mb-4 p-3 bg-primary/5 border border-primary/20 rounded-input">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <div
+              onClick={() => setForm(f => ({ ...f, source: f.source === 'crm_fechados' ? undefined : 'crm_fechados' }))}
+              className={`w-10 h-5 rounded-full transition-colors relative flex-shrink-0 ${form.source === 'crm_fechados' ? 'bg-primary' : 'bg-gray-700'}`}
+            >
+              <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.source === 'crm_fechados' ? 'translate-x-5' : 'translate-x-0.5'}`} />
+            </div>
+            <div>
+              <p className="text-xs text-white font-medium">Vincular ao CRM — Fechamentos</p>
+              <p className="text-[10px] text-gray-500 mt-0.5">O valor atual é calculado automaticamente pelos leads na etapa Fechamento</p>
+            </div>
+          </label>
+        </div>
+
         <div className="mb-4">
           <label className="block text-xs text-gray-400 mb-1">Unidade (R$, %, pts, clientes...)</label>
           <input value={form.unidade} onChange={e => setForm(f => ({ ...f, unidade: e.target.value }))}

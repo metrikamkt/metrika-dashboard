@@ -108,6 +108,7 @@ export interface Meta {
   atual: number;
   responsavel: string;
   unidade: string;
+  source?: 'crm_fechados'; // if set, 'atual' is auto-computed from CRM closed leads
 }
 
 // ─── Root state ───────────────────────────────────────────────────────────────

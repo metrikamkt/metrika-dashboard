@@ -97,23 +97,39 @@ export default function Demandas() {
         ))}
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-3 mb-4 flex-wrap">
-        <div className="flex bg-surface border border-border rounded-input p-0.5 gap-0.5">
-          {([{ key: 'todas', label: 'Todas' }, ...STATUS.map(s => ({ key: s.key, label: s.label }))] as { key: DemandaStatus | 'todas'; label: string }[]).map(s => (
-            <button key={s.key} onClick={() => setFilterStatus(s.key)}
-              className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${filterStatus === s.key ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'}`}>
-              {s.label}
-            </button>
-          ))}
+      {/* Filters — selects on mobile, button groups on desktop */}
+      <div className="mb-4">
+        {/* Mobile */}
+        <div className="flex gap-2 md:hidden">
+          <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as DemandaStatus | 'todas')}
+            className="flex-1 bg-surface border border-border rounded-input px-3 py-2 text-xs text-white focus:outline-none focus:border-primary">
+            <option value="todas">Status: Todos</option>
+            {STATUS.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
+          </select>
+          <select value={filterPrioridade} onChange={e => setFilterPrioridade(e.target.value as DemandaPrioridade | 'todas')}
+            className="flex-1 bg-surface border border-border rounded-input px-3 py-2 text-xs text-white focus:outline-none focus:border-primary">
+            <option value="todas">Prioridade: Todas</option>
+            {PRIORIDADE.map(p => <option key={p.key} value={p.key}>{p.label}</option>)}
+          </select>
         </div>
-        <div className="flex bg-surface border border-border rounded-input p-0.5 gap-0.5">
-          {([{ key: 'todas', label: 'Prioridades' }, ...PRIORIDADE.map(p => ({ key: p.key, label: p.label }))] as { key: DemandaPrioridade | 'todas'; label: string }[]).map(p => (
-            <button key={p.key} onClick={() => setFilterPrioridade(p.key)}
-              className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${filterPrioridade === p.key ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'}`}>
-              {p.label}
-            </button>
-          ))}
+        {/* Desktop */}
+        <div className="hidden md:flex gap-3 flex-wrap">
+          <div className="flex bg-surface border border-border rounded-input p-0.5 gap-0.5">
+            {([{ key: 'todas', label: 'Todas' }, ...STATUS.map(s => ({ key: s.key, label: s.label }))] as { key: DemandaStatus | 'todas'; label: string }[]).map(s => (
+              <button key={s.key} onClick={() => setFilterStatus(s.key)}
+                className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${filterStatus === s.key ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'}`}>
+                {s.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex bg-surface border border-border rounded-input p-0.5 gap-0.5">
+            {([{ key: 'todas', label: 'Prioridades' }, ...PRIORIDADE.map(p => ({ key: p.key, label: p.label }))] as { key: DemandaPrioridade | 'todas'; label: string }[]).map(p => (
+              <button key={p.key} onClick={() => setFilterPrioridade(p.key)}
+                className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${filterPrioridade === p.key ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'}`}>
+                {p.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
