@@ -4,6 +4,8 @@ import {
   signInWithPopup,
   signOut,
   updateProfile,
+  setPersistence,
+  browserLocalPersistence,
   type User,
 } from 'firebase/auth';
 import { doc, onSnapshot, setDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
@@ -85,6 +87,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signInWithGoogle = async () => {
+    // browserLocalPersistence avoids iOS Safari's sessionStorage partitioning bug
+    await setPersistence(auth, browserLocalPersistence);
     await signInWithPopup(auth, googleProvider);
   };
 

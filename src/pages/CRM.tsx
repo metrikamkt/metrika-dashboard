@@ -41,7 +41,13 @@ const FUNIL_STAGES: {
 function FunnelChart({ leads }: { leads: Lead[] }) {
   const [tooltip, setTooltip] = useState<number | null>(null);
 
-  const counts = FUNIL_STAGES.map(s => leads.filter(l => l.etapa === s.key).length);
+  // Cumulative count: each stage includes everyone at that stage OR any later stage.
+  // Rationale: a lead in "Reunião Feita" has already passed through all prior stages.
+  const cumulativeCounts = FUNIL_STAGES.map((_, i) => {
+    const keysFromHere = FUNIL_STAGES.slice(i).map(s => s.key);
+    return leads.filter(l => keysFromHere.includes(l.etapa)).length;
+  });
+  const counts = cumulativeCounts;
   const baseReal = counts[0] || 1;
 
   return (
@@ -242,15 +248,16 @@ export default function CRM() {
         </button>
       </div>
 
-      {/* Kanban board */}
-      <div className="grid grid-cols-6 gap-3">
+      {/* Kanban board — horizontal scroll on mobile, grid on desktop */}
+      <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 pb-2">
+        <div className="flex gap-3 md:grid md:grid-cols-6" style={{ minWidth: 'max-content' }} >
         {ETAPAS.map(etapa => {
           const leads = data.leads.filter(l => l.etapa === etapa.key);
           const total = leads.reduce((s, l) => s + l.valor, 0);
           return (
             <div
               key={etapa.key}
-              className={`bg-surface border rounded-card flex flex-col max-h-[calc(100vh-220px)] ${etapa.color}`}
+              className={`w-52 md:w-auto flex-shrink-0 md:flex-shrink bg-surface border rounded-card flex flex-col max-h-[calc(100vh-220px)] ${etapa.color}`}
             >
               {/* Column header */}
               <div className="p-3 border-b border-border flex-shrink-0">
@@ -336,6 +343,7 @@ export default function CRM() {
             </div>
           );
         })}
+        </div>
       </div>
 
       {/* Funnel chart */}
