@@ -41,8 +41,6 @@ const FUNIL_STAGES: {
 function FunnelChart({ leads }: { leads: Lead[] }) {
   const [tooltip, setTooltip] = useState<number | null>(null);
 
-  // Cumulative count: each stage includes everyone at that stage OR any later stage.
-  // Rationale: a lead in "Reunião Feita" has already passed through all prior stages.
   const cumulativeCounts = FUNIL_STAGES.map((_, i) => {
     const keysFromHere = FUNIL_STAGES.slice(i).map(s => s.key);
     return leads.filter(l => keysFromHere.includes(l.etapa)).length;
@@ -51,21 +49,20 @@ function FunnelChart({ leads }: { leads: Lead[] }) {
   const baseReal = counts[0] || 1;
 
   return (
-    <div className="bg-surface border border-border rounded-card p-5 mb-5">
+    <div className="bg-surface border border-border rounded-card p-4 md:p-5 mb-5">
       {/* Header */}
-      <div className="flex items-start justify-between mb-5">
+      <div className="flex items-start justify-between mb-4">
         <div>
           <h3 className="text-white font-semibold">Funil de Conversão</h3>
           <p className="text-gray-500 text-xs mt-0.5">Real vs Meta · sincronizado com o kanban</p>
         </div>
-        {/* Legend */}
-        <div className="flex items-center gap-5 text-xs text-gray-500">
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block w-4 h-2.5 rounded-sm bg-gradient-to-r from-[#0087f0] to-[#01c2f0]" />
+        <div className="flex items-center gap-3 text-xs text-gray-500 flex-shrink-0">
+          <span className="flex items-center gap-1">
+            <span className="inline-block w-3 h-2 rounded-sm bg-gradient-to-r from-[#0087f0] to-[#01c2f0]" />
             Real
           </span>
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block w-4 h-2.5 rounded-sm border-2 border-dashed border-gray-500" />
+          <span className="flex items-center gap-1">
+            <span className="inline-block w-3 h-2 rounded-sm border-2 border-dashed border-gray-500" />
             Meta
           </span>
         </div>
@@ -74,15 +71,15 @@ function FunnelChart({ leads }: { leads: Lead[] }) {
       {/* Bars */}
       <div className="space-y-3">
         {FUNIL_STAGES.map((stage, i) => {
-          const count      = counts[i];
-          const prevCount  = i > 0 ? counts[i - 1] : null;
-          const realConv   = prevCount != null
+          const count     = counts[i];
+          const prevCount = i > 0 ? counts[i - 1] : null;
+          const realConv  = prevCount != null
             ? (prevCount > 0 ? +(count / prevCount * 100).toFixed(1) : 0)
             : null;
-          const realPct    = +(count / baseReal * 100).toFixed(1);   // % vs topo real
-          const metaPct    = stage.metaPct;                           // % vs topo meta
-          const aboveMeta  = realConv != null && stage.metaConv != null && realConv >= stage.metaConv;
-          const isTooltip  = tooltip === i;
+          const realPct   = +(count / baseReal * 100).toFixed(1);
+          const metaPct   = stage.metaPct;
+          const aboveMeta = realConv != null && stage.metaConv != null && realConv >= stage.metaConv;
+          const isTooltip = tooltip === i;
 
           return (
             <div
@@ -91,19 +88,19 @@ function FunnelChart({ leads }: { leads: Lead[] }) {
               onMouseEnter={() => setTooltip(i)}
               onMouseLeave={() => setTooltip(null)}
             >
-              {/* Row label + rate */}
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-gray-300 w-36 flex-shrink-0">{stage.label}</span>
-                  <span className="text-sm font-bold text-white">{count}</span>
+              {/* Label row — compact on mobile */}
+              <div className="flex items-center justify-between mb-1 gap-2">
+                <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden">
+                  <span className="text-xs font-medium text-gray-300 w-24 md:w-36 flex-shrink-0 truncate">{stage.label}</span>
+                  <span className="text-sm font-bold text-white flex-shrink-0">{count}</span>
                   {realConv != null && (
-                    <span className={`text-xs font-semibold ${aboveMeta ? 'text-green-400' : 'text-red-400'}`}>
+                    <span className={`text-xs font-semibold flex-shrink-0 ${aboveMeta ? 'text-green-400' : 'text-red-400'}`}>
                       {aboveMeta ? '✅' : '❌'} {realConv}%
                     </span>
                   )}
                 </div>
                 {stage.metaConv != null && (
-                  <span className="text-[10px] text-gray-600">
+                  <span className="hidden md:block text-[10px] text-gray-600 flex-shrink-0">
                     meta: {stage.metaConv}%
                   </span>
                 )}
@@ -111,20 +108,14 @@ function FunnelChart({ leads }: { leads: Lead[] }) {
 
               {/* Bar track */}
               <div className="relative h-6 bg-bg rounded-input overflow-hidden">
-                {/* Meta bar — dashed outline */}
                 <div
                   className="absolute inset-y-0 left-0 border-2 border-dashed border-gray-500/60 rounded-input transition-all duration-500"
                   style={{ width: `${metaPct}%` }}
                 />
-                {/* Real bar — solid gradient fill */}
                 <div
                   className="absolute inset-y-0 left-0 rounded-input transition-all duration-700"
-                  style={{
-                    width: `${realPct}%`,
-                    background: `linear-gradient(90deg, ${stage.color}cc, ${stage.color})`,
-                  }}
+                  style={{ width: `${realPct}%`, background: `linear-gradient(90deg, ${stage.color}cc, ${stage.color})` }}
                 />
-                {/* Inline % label */}
                 {realPct > 8 && (
                   <span className="absolute inset-y-0 left-2 flex items-center text-[10px] font-semibold text-white/80 select-none">
                     {realPct}%
@@ -132,16 +123,16 @@ function FunnelChart({ leads }: { leads: Lead[] }) {
                 )}
               </div>
 
-              {/* Tooltip */}
+              {/* Tooltip — desktop only */}
               {isTooltip && (
-                <div className="absolute left-40 top-0 z-20 bg-gray-900 border border-border rounded-input px-3 py-2 text-xs shadow-xl whitespace-nowrap">
+                <div className="hidden md:block absolute left-40 top-0 z-20 bg-gray-900 border border-border rounded-input px-3 py-2 text-xs shadow-xl whitespace-nowrap">
                   <p className="text-white font-semibold mb-1">{stage.label}</p>
                   <p className="text-gray-400">Leads: <span className="text-white">{count}</span></p>
-                  <p className="text-gray-400">% do topo real: <span className="text-white">{realPct}%</span></p>
+                  <p className="text-gray-400">% do topo: <span className="text-white">{realPct}%</span></p>
                   {realConv != null && (
                     <>
                       <p className="text-gray-400">Conversão real: <span className={aboveMeta ? 'text-green-400' : 'text-red-400'}>{realConv}%</span></p>
-                      <p className="text-gray-400">Conversão meta: <span className="text-white">{stage.metaConv}%</span></p>
+                      <p className="text-gray-400">Meta: <span className="text-white">{stage.metaConv}%</span></p>
                       <p className={`font-semibold mt-1 ${aboveMeta ? 'text-green-400' : 'text-red-400'}`}>
                         {aboveMeta ? '✅ Acima da meta' : '❌ Abaixo da meta'}
                       </p>
@@ -154,26 +145,28 @@ function FunnelChart({ leads }: { leads: Lead[] }) {
         })}
       </div>
 
-      {/* Summary row */}
-      <div className="mt-5 pt-4 border-t border-border grid grid-cols-5 gap-2">
-        {FUNIL_STAGES.map((stage, i) => {
-          const count     = counts[i];
-          const prevCount = i > 0 ? counts[i - 1] : null;
-          const realConv  = prevCount != null
-            ? (prevCount > 0 ? +(count / prevCount * 100).toFixed(1) : 0)
-            : null;
-          const above = realConv != null && stage.metaConv != null && realConv >= stage.metaConv;
-          return (
-            <div key={stage.key} className="bg-bg border border-border rounded-input p-2.5 text-center">
-              <p className="text-[10px] text-gray-500 truncate">{stage.label}</p>
-              <p className="text-lg font-bold text-white mt-0.5">{count}</p>
-              {realConv != null
-                ? <p className={`text-xs font-semibold ${above ? 'text-green-400' : 'text-red-400'}`}>{realConv}%</p>
-                : <p className="text-xs text-gray-600">—</p>
-              }
-            </div>
-          );
-        })}
+      {/* Summary row — horizontal scroll on mobile */}
+      <div className="mt-4 pt-4 border-t border-border overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+        <div className="flex gap-2 md:grid md:grid-cols-5 pb-1 md:pb-0" style={{ minWidth: 'max-content' }}>
+          {FUNIL_STAGES.map((stage, i) => {
+            const count     = counts[i];
+            const prevCount = i > 0 ? counts[i - 1] : null;
+            const realConv  = prevCount != null
+              ? (prevCount > 0 ? +(count / prevCount * 100).toFixed(1) : 0)
+              : null;
+            const above = realConv != null && stage.metaConv != null && realConv >= stage.metaConv;
+            return (
+              <div key={stage.key} className="w-[90px] md:w-auto flex-shrink-0 md:flex-shrink bg-bg border border-border rounded-input p-2 text-center">
+                <p className="text-[9px] text-gray-500 truncate">{stage.label}</p>
+                <p className="text-base font-bold text-white mt-0.5">{count}</p>
+                {realConv != null
+                  ? <p className={`text-[10px] font-semibold ${above ? 'text-green-400' : 'text-red-400'}`}>{realConv}%</p>
+                  : <p className="text-[10px] text-gray-600">—</p>
+                }
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -248,16 +241,16 @@ export default function CRM() {
         </button>
       </div>
 
-      {/* Kanban board — snap-scroll on mobile, grid on desktop */}
-      <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 pb-2 snap-x snap-mandatory md:snap-none">
-        <div className="flex gap-3 md:grid md:grid-cols-6" style={{ minWidth: 'max-content' }} >
+      {/* Kanban board — Trello-style snap scroll on mobile, grid on desktop */}
+      <div className="overflow-x-scroll snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible md:snap-none pb-2">
+        <div className="flex gap-3 md:grid md:grid-cols-6">
         {ETAPAS.map(etapa => {
           const leads = data.leads.filter(l => l.etapa === etapa.key);
           const total = leads.reduce((s, l) => s + l.valor, 0);
           return (
             <div
               key={etapa.key}
-              className={`snap-start w-[82vw] md:w-auto flex-shrink-0 md:flex-shrink bg-surface border rounded-card flex flex-col max-h-[calc(100vh-220px)] ${etapa.color}`}
+              className={`snap-start flex-shrink-0 w-[calc(100vw-3rem)] md:w-auto md:flex-shrink bg-surface border rounded-card flex flex-col max-h-[calc(100vh-220px)] ${etapa.color}`}
             >
               {/* Column header */}
               <div className="p-3 border-b border-border flex-shrink-0">
