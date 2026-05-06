@@ -49,7 +49,7 @@ function FunnelChart({ leads }: { leads: Lead[] }) {
   const baseReal = counts[0] || 1;
 
   return (
-    <div className="bg-surface border border-border rounded-card p-4 md:p-5 mb-5">
+    <div className="bg-surface border border-border rounded-card p-4 mb-5 overflow-hidden">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div>
@@ -145,28 +145,26 @@ function FunnelChart({ leads }: { leads: Lead[] }) {
         })}
       </div>
 
-      {/* Summary row — horizontal scroll on mobile */}
-      <div className="mt-4 pt-4 border-t border-border overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
-        <div className="flex gap-2 md:grid md:grid-cols-5 pb-1 md:pb-0" style={{ minWidth: 'max-content' }}>
-          {FUNIL_STAGES.map((stage, i) => {
-            const count     = counts[i];
-            const prevCount = i > 0 ? counts[i - 1] : null;
-            const realConv  = prevCount != null
-              ? (prevCount > 0 ? +(count / prevCount * 100).toFixed(1) : 0)
-              : null;
-            const above = realConv != null && stage.metaConv != null && realConv >= stage.metaConv;
-            return (
-              <div key={stage.key} className="w-[90px] md:w-auto flex-shrink-0 md:flex-shrink bg-bg border border-border rounded-input p-2 text-center">
-                <p className="text-[9px] text-gray-500 truncate">{stage.label}</p>
-                <p className="text-base font-bold text-white mt-0.5">{count}</p>
-                {realConv != null
-                  ? <p className={`text-[10px] font-semibold ${above ? 'text-green-400' : 'text-red-400'}`}>{realConv}%</p>
-                  : <p className="text-[10px] text-gray-600">—</p>
-                }
-              </div>
-            );
-          })}
-        </div>
+      {/* Summary row — desktop only (evita overflow no mobile) */}
+      <div className="hidden md:grid grid-cols-5 gap-2 mt-5 pt-4 border-t border-border">
+        {FUNIL_STAGES.map((stage, i) => {
+          const count     = counts[i];
+          const prevCount = i > 0 ? counts[i - 1] : null;
+          const realConv  = prevCount != null
+            ? (prevCount > 0 ? +(count / prevCount * 100).toFixed(1) : 0)
+            : null;
+          const above = realConv != null && stage.metaConv != null && realConv >= stage.metaConv;
+          return (
+            <div key={stage.key} className="bg-bg border border-border rounded-input p-2.5 text-center">
+              <p className="text-[9px] text-gray-500 truncate">{stage.label}</p>
+              <p className="text-base font-bold text-white mt-0.5">{count}</p>
+              {realConv != null
+                ? <p className={`text-[10px] font-semibold ${above ? 'text-green-400' : 'text-red-400'}`}>{realConv}%</p>
+                : <p className="text-[10px] text-gray-600">—</p>
+              }
+            </div>
+          );
+        })}
       </div>
     </div>
   );
