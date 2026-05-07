@@ -132,30 +132,32 @@ export default function Financeiro() {
           {fixos.length === 0 ? (
             <p className="text-center text-gray-600 text-sm py-8">Nenhum custo fixo no período</p>
           ) : (
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  {['Descrição','Categoria','Valor',''].map(h => (
-                    <th key={h} className="text-left text-xs text-gray-500 uppercase px-4 py-2">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {fixos.map(c => (
-                  <tr key={c.id} className="border-b border-border last:border-0 hover:bg-white/[0.02] transition-colors">
-                    <td className="px-4 py-2.5 text-white text-sm">{c.descricao}</td>
-                    <td className="px-4 py-2.5 text-gray-500 text-xs">{c.categoria}</td>
-                    <td className="px-4 py-2.5 text-primary font-medium text-sm whitespace-nowrap">{fmt(c.valor)}</td>
-                    <td className="px-4 py-2.5">
-                      <button onClick={() => { dispatch({ type: 'DELETE_CUSTO', payload: c.id }); showToast('Custo excluído'); }}
-                        className="text-gray-600 hover:text-red-400 transition-colors">
-                        <Trash2 size={13} />
-                      </button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[320px]">
+                <thead>
+                  <tr className="border-b border-border">
+                    {['Descrição','Categoria','Valor',''].map(h => (
+                      <th key={h} className="text-left text-xs text-gray-500 uppercase px-4 py-2">{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {fixos.map(c => (
+                    <tr key={c.id} className="border-b border-border last:border-0 hover:bg-white/[0.02] transition-colors">
+                      <td className="px-4 py-2.5 text-white text-sm">{c.descricao}</td>
+                      <td className="px-4 py-2.5 text-gray-500 text-xs">{c.categoria}</td>
+                      <td className="px-4 py-2.5 text-primary font-medium text-sm whitespace-nowrap">{fmt(c.valor)}</td>
+                      <td className="px-4 py-2.5">
+                        <button onClick={() => { dispatch({ type: 'DELETE_CUSTO', payload: c.id }); showToast('Custo excluído'); }}
+                          className="text-gray-600 hover:text-red-400 transition-colors">
+                          <Trash2 size={13} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
 
@@ -168,30 +170,32 @@ export default function Financeiro() {
           {variaveis.length === 0 ? (
             <p className="text-center text-gray-600 text-sm py-8">Nenhum custo variável no período</p>
           ) : (
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  {['Descrição','Categoria','Valor',''].map(h => (
-                    <th key={h} className="text-left text-xs text-gray-500 uppercase px-4 py-2">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {variaveis.map(c => (
-                  <tr key={c.id} className="border-b border-border last:border-0 hover:bg-white/[0.02] transition-colors">
-                    <td className="px-4 py-2.5 text-white text-sm">{c.descricao}</td>
-                    <td className="px-4 py-2.5 text-gray-500 text-xs">{c.categoria}</td>
-                    <td className="px-4 py-2.5 text-cyan font-medium text-sm whitespace-nowrap">{fmt(c.valor)}</td>
-                    <td className="px-4 py-2.5">
-                      <button onClick={() => { dispatch({ type: 'DELETE_CUSTO', payload: c.id }); showToast('Custo excluído'); }}
-                        className="text-gray-600 hover:text-red-400 transition-colors">
-                        <Trash2 size={13} />
-                      </button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[320px]">
+                <thead>
+                  <tr className="border-b border-border">
+                    {['Descrição','Categoria','Valor',''].map(h => (
+                      <th key={h} className="text-left text-xs text-gray-500 uppercase px-4 py-2">{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {variaveis.map(c => (
+                    <tr key={c.id} className="border-b border-border last:border-0 hover:bg-white/[0.02] transition-colors">
+                      <td className="px-4 py-2.5 text-white text-sm">{c.descricao}</td>
+                      <td className="px-4 py-2.5 text-gray-500 text-xs">{c.categoria}</td>
+                      <td className="px-4 py-2.5 text-cyan font-medium text-sm whitespace-nowrap">{fmt(c.valor)}</td>
+                      <td className="px-4 py-2.5">
+                        <button onClick={() => { dispatch({ type: 'DELETE_CUSTO', payload: c.id }); showToast('Custo excluído'); }}
+                          className="text-gray-600 hover:text-red-400 transition-colors">
+                          <Trash2 size={13} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>

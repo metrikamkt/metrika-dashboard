@@ -17,7 +17,14 @@
       "Bash(git commit -m 'Move funnel chart below kanban board *)",
       "Bash(dir \"C:\\\\Users\\\\arthu\\\\Downloads\" /b /o:-d)",
       "Bash(npm run *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(cat vite.config.ts)",
+      "Bash(cat vite.config.js)",
+      "Bash(ls -la .github)",
+      "Bash(ls firebase.json)",
+      "Bash(ls netlify.toml)",
+      "Bash(ls vercel.json)",
+      "Bash(ls .firebaserc)"
     ]
   }
 }

@@ -159,32 +159,34 @@ export default function Vendas() {
             <button onClick={() => setDrawerOpen(true)} className="mt-3 text-primary text-sm hover:underline">+ Registrar venda</button>
           </div>
         ) : (
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border">
-                {['Data','Cliente','Produto','NF','Valor',''].map(h => (
-                  <th key={h} className="text-left text-xs text-gray-500 uppercase px-4 py-3">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {[...filtered].sort((a, b) => b.data.localeCompare(a.data)).map(l => (
-                <tr key={l.id} className="border-b border-border last:border-0 hover:bg-white/[0.02]">
-                  <td className="px-4 py-3 text-gray-400 text-sm">{new Date(l.data).toLocaleDateString('pt-BR')}</td>
-                  <td className="px-4 py-3 text-white text-sm">{l.clienteNome || '—'}</td>
-                  <td className="px-4 py-3 text-gray-400 text-sm">{l.produtoNome || '—'}</td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{l.nfNumero || '—'}</td>
-                  <td className="px-4 py-3 text-primary font-semibold">{fmt(l.valor)}</td>
-                  <td className="px-4 py-3">
-                    <button onClick={() => { dispatch({ type: 'DELETE_LANCAMENTO', payload: l.id }); showToast('Venda excluída'); }}
-                      className="text-gray-600 hover:text-red-400 transition-colors">
-                      <Trash2 size={14} />
-                    </button>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[460px]">
+              <thead>
+                <tr className="border-b border-border">
+                  {['Data','Cliente','Produto','NF','Valor',''].map(h => (
+                    <th key={h} className="text-left text-xs text-gray-500 uppercase px-4 py-3">{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {[...filtered].sort((a, b) => b.data.localeCompare(a.data)).map(l => (
+                  <tr key={l.id} className="border-b border-border last:border-0 hover:bg-white/[0.02]">
+                    <td className="px-4 py-3 text-gray-400 text-sm">{new Date(l.data).toLocaleDateString('pt-BR')}</td>
+                    <td className="px-4 py-3 text-white text-sm">{l.clienteNome || '—'}</td>
+                    <td className="px-4 py-3 text-gray-400 text-sm">{l.produtoNome || '—'}</td>
+                    <td className="px-4 py-3 text-gray-500 text-xs">{l.nfNumero || '—'}</td>
+                    <td className="px-4 py-3 text-primary font-semibold">{fmt(l.valor)}</td>
+                    <td className="px-4 py-3">
+                      <button onClick={() => { dispatch({ type: 'DELETE_LANCAMENTO', payload: l.id }); showToast('Venda excluída'); }}
+                        className="text-gray-600 hover:text-red-400 transition-colors">
+                        <Trash2 size={14} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
