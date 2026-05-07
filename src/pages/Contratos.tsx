@@ -53,9 +53,9 @@ export default function Contratos() {
         <p className="text-gray-500 text-sm">Gere contratos automaticamente a partir dos templates dos produtos</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Form */}
-        <div className="col-span-1">
+        <div className="md:col-span-1">
           <div className="bg-surface border border-border rounded-card p-5 space-y-4">
             <h3 className="text-white font-semibold">Dados do Contrato</h3>
 
@@ -121,9 +121,9 @@ export default function Contratos() {
         </div>
 
         {/* Preview */}
-        <div className="col-span-2">
+        <div className="md:col-span-2">
           {preview ? (
-            <div className="bg-surface border border-border rounded-card h-full flex flex-col">
+            <div className="bg-surface border border-border rounded-card min-h-[400px] md:h-full flex flex-col">
               <div className="flex items-center justify-between p-4 border-b border-border">
                 <h3 className="text-white font-semibold flex items-center gap-2"><FileText size={16} /> Pré-visualização do Contrato</h3>
                 <div className="flex gap-2">
@@ -139,7 +139,7 @@ export default function Contratos() {
               </div>
             </div>
           ) : (
-            <div className="bg-surface border border-dashed border-border rounded-card h-full flex flex-col items-center justify-center text-gray-600">
+            <div className="bg-surface border border-dashed border-border rounded-card min-h-[250px] md:h-full flex flex-col items-center justify-center text-gray-600">
               <FileText size={48} className="mb-4 text-gray-700" />
               <p className="text-lg font-medium text-gray-500">Pré-visualização do Contrato</p>
               <p className="text-sm mt-2">Selecione cliente e produto, depois clique em "Gerar"</p>
@@ -151,7 +151,7 @@ export default function Contratos() {
       {/* Products with templates */}
       <div className="mt-6">
         <h3 className="text-white font-semibold mb-4">Templates Disponíveis</h3>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
           {data.produtos.filter(p => p.contratoTemplate).map(p => (
             <div key={p.id} className="bg-surface border border-border rounded-card p-4 flex items-center gap-3 cursor-pointer hover:border-primary/30 transition-all"
               onClick={() => { setProdutoId(p.id); }}>

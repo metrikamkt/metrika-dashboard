@@ -89,9 +89,9 @@ function FunnelChart({ leads }: { leads: Lead[] }) {
               onMouseLeave={() => setTooltip(null)}
             >
               {/* Label row — compact on mobile */}
-              <div className="flex items-center justify-between mb-1 gap-2">
-                <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden">
-                  <span className="text-xs font-medium text-gray-300 w-24 md:w-36 flex-shrink-0 truncate">{stage.label}</span>
+              <div className="flex items-center justify-between mb-1 gap-1">
+                <div className="flex items-center flex-wrap gap-x-1.5 gap-y-0.5 min-w-0 flex-1 overflow-hidden">
+                  <span className="text-xs font-medium text-gray-300 w-20 md:w-36 flex-shrink-0 truncate">{stage.label}</span>
                   <span className="text-sm font-bold text-white flex-shrink-0">{count}</span>
                   {realConv != null && (
                     <span className={`text-xs font-semibold flex-shrink-0 ${aboveMeta ? 'text-green-400' : 'text-red-400'}`}>
@@ -291,7 +291,7 @@ export default function CRM() {
       </div>
 
       {/* ── MOBILE KANBAN — full-width swipe, one column at a time ── */}
-      <div className="md:hidden">
+      <div className="md:hidden overflow-hidden">
         {/* Etapa indicator */}
         <div className="flex items-center justify-between mb-2 px-0.5">
           <span className={`text-xs font-semibold uppercase tracking-wide ${ETAPA_TEXT[ETAPAS[currentCol].key]}`}>
@@ -304,8 +304,8 @@ export default function CRM() {
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="flex overflow-x-scroll snap-x snap-mandatory rounded-card"
-          style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+          className="flex overflow-x-scroll snap-x snap-mandatory rounded-card w-full"
+          style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', width: '100%' } as React.CSSProperties}
         >
           {ETAPAS.map(etapa => {
             const colLeads = data.leads.filter(l => l.etapa === etapa.key);

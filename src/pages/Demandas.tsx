@@ -3,7 +3,7 @@ import { useData } from '../context/DataContext';
 import { useToast } from '../context/ToastContext';
 import { Drawer } from '../components/layout/Drawer';
 import { FormField } from '../components/ui/FormField';
-import { Plus, Trash2, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, Clock, AlertCircle, Pencil } from 'lucide-react';
 import type { Demanda, DemandaPrioridade, DemandaStatus } from '../data/mockData';
 
 const PRIORIDADE: { key: DemandaPrioridade; label: string; color: string }[] = [
@@ -157,20 +157,23 @@ export default function Demandas() {
                 <Icon size={18} />
               </button>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center flex-wrap gap-1.5 mb-1">
                   <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${pCfg.color}`}>{pCfg.label}</span>
                   <span className="text-[10px] text-gray-500 bg-surface border border-border rounded-full px-2 py-0.5">{sCfg.label}</span>
                   {isOverdue && <span className="text-[10px] text-red-400 bg-red-500/10 border border-red-500/30 rounded-full px-2 py-0.5">Atrasada</span>}
                 </div>
                 <p className={`text-sm font-medium ${d.status === 'concluida' ? 'line-through text-gray-500' : 'text-white'}`}>{d.titulo}</p>
                 {d.descricao && <p className="text-gray-500 text-xs mt-1 truncate">{d.descricao}</p>}
-                <div className="flex items-center gap-3 mt-2 text-xs text-gray-600">
+                <div className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-2 text-xs text-gray-600">
                   <span>👤 {d.responsavel}</span>
                   {d.dataVencimento && <span>📅 Vence {new Date(d.dataVencimento).toLocaleDateString('pt-BR')}</span>}
                 </div>
               </div>
               <div className="flex gap-1 flex-shrink-0">
-                <button onClick={() => openEdit(d)} className="p-1.5 hover:bg-white/5 rounded text-gray-500 hover:text-primary transition-colors text-xs">Editar</button>
+                <button onClick={() => openEdit(d)} className="p-1.5 hover:bg-white/5 rounded text-gray-500 hover:text-primary transition-colors">
+                  <span className="hidden md:inline text-xs">Editar</span>
+                  <Pencil size={13} className="md:hidden" />
+                </button>
                 <button onClick={() => { dispatch({ type: 'DELETE_DEMANDA', payload: d.id }); showToast('Demanda excluída'); }}
                   className="p-1.5 hover:bg-red-500/10 rounded text-gray-600 hover:text-red-400 transition-colors">
                   <Trash2 size={13} />

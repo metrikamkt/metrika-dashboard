@@ -61,21 +61,21 @@ export default function Produtos() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-3 gap-2 md:gap-4 mb-6">
         {[
           { label: 'Produtos Ativos', value: data.produtos.length },
           { label: 'Clientes Vinculados', value: data.clientes.filter(c => c.produtoId !== '').length },
           { label: 'Receita Total Gerada', value: fmt(data.lancamentos.reduce((s, l) => s + l.valor, 0)) },
         ].map(k => (
-          <div key={k.label} className="bg-surface border border-border rounded-card p-5">
-            <p className="text-gray-500 text-xs uppercase tracking-wide">{k.label}</p>
-            <p className="text-2xl font-bold text-white mt-2">{k.value}</p>
+          <div key={k.label} className="bg-surface border border-border rounded-card p-3 md:p-5">
+            <p className="text-gray-500 text-[10px] md:text-xs uppercase tracking-wide leading-tight">{k.label}</p>
+            <p className="text-lg md:text-2xl font-bold text-white mt-1 md:mt-2">{k.value}</p>
           </div>
         ))}
       </div>
 
       {/* Products grid */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {data.produtos.map(p => {
           const activeClients = getActiveClients(p.id);
           const revenue = getRevenue(p.id);
@@ -87,7 +87,7 @@ export default function Produtos() {
                     <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20">{p.categoria}</span>
                   </div>
                   <h3 className="text-white font-semibold">{p.nome}</h3>
-                  <p className="text-gray-500 text-sm mt-1 line-clamp-2">{p.descricao}</p>
+                  <p className="text-gray-500 text-sm mt-1">{p.descricao}</p>
                 </div>
                 <div className="flex gap-1 ml-3 flex-shrink-0">
                   <button onClick={() => openEdit(p)}
@@ -100,18 +100,18 @@ export default function Produtos() {
                   </button>
                 </div>
               </div>
-              <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
+              <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-border">
                 <div>
-                  <p className="text-xs text-gray-500">Preço base</p>
-                  <p className="text-primary font-bold text-lg">{fmt(p.preco)}</p>
+                  <p className="text-[10px] md:text-xs text-gray-500">Preço base</p>
+                  <p className="text-primary font-bold text-base md:text-lg">{fmt(p.preco)}</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs text-gray-500 flex items-center gap-1 justify-end"><Users size={10} /> Clientes ativos</p>
-                  <p className="text-white font-semibold text-lg">{activeClients}</p>
+                <div>
+                  <p className="text-[10px] md:text-xs text-gray-500 flex items-center gap-1"><Users size={10} /> Clientes ativos</p>
+                  <p className="text-white font-semibold text-base md:text-lg">{activeClients}</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs text-gray-500">Receita gerada</p>
-                  <p className="text-cyan font-semibold">{fmt(revenue)}</p>
+                <div>
+                  <p className="text-[10px] md:text-xs text-gray-500">Receita gerada</p>
+                  <p className="text-cyan font-semibold text-sm md:text-base">{fmt(revenue)}</p>
                 </div>
               </div>
             </div>
