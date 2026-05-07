@@ -44,9 +44,6 @@ export default function Produtos() {
   const getActiveClients = (produtoId: string) =>
     data.clientes.filter(c => c.produtoId === produtoId && c.status === 'ativo').length;
 
-  const getRevenue = (produtoId: string) =>
-    data.lancamentos.filter(l => l.produtoId === produtoId).reduce((s, l) => s + l.valor, 0);
-
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -61,11 +58,10 @@ export default function Produtos() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-3 gap-2 md:gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-2 md:gap-4 mb-6">
         {[
           { label: 'Produtos Ativos', value: data.produtos.length },
           { label: 'Clientes Vinculados', value: data.clientes.filter(c => c.produtoId !== '').length },
-          { label: 'Receita Total Gerada', value: fmt(data.lancamentos.reduce((s, l) => s + l.valor, 0)) },
         ].map(k => (
           <div key={k.label} className="bg-surface border border-border rounded-card p-3 md:p-5">
             <p className="text-gray-500 text-[10px] md:text-xs uppercase tracking-wide leading-tight">{k.label}</p>
@@ -78,7 +74,6 @@ export default function Produtos() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {data.produtos.map(p => {
           const activeClients = getActiveClients(p.id);
-          const revenue = getRevenue(p.id);
           return (
             <div key={p.id} className="bg-surface border border-border rounded-card p-5">
               <div className="flex items-start justify-between mb-3">
@@ -100,7 +95,7 @@ export default function Produtos() {
                   </button>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-border">
+              <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-border">
                 <div>
                   <p className="text-[10px] md:text-xs text-gray-500">Preço base</p>
                   <p className="text-primary font-bold text-base md:text-lg">{fmt(p.preco)}</p>
@@ -108,10 +103,6 @@ export default function Produtos() {
                 <div>
                   <p className="text-[10px] md:text-xs text-gray-500 flex items-center gap-1"><Users size={10} /> Clientes ativos</p>
                   <p className="text-white font-semibold text-base md:text-lg">{activeClients}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] md:text-xs text-gray-500">Receita gerada</p>
-                  <p className="text-cyan font-semibold text-sm md:text-base">{fmt(revenue)}</p>
                 </div>
               </div>
             </div>
