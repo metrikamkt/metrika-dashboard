@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, DollarSign, TrendingUp, Users, Package,
-  UserCheck, Target, ChevronRight, Kanban, FileText, ClipboardList
+  UserCheck, Target, ChevronRight, Kanban, ClipboardList
 } from 'lucide-react';
 import { Logo } from './Logo';
 import { useState } from 'react';
@@ -26,7 +26,7 @@ const nav = [
   ]},
   { section: 'Estratégia', items: [
     { label: 'Metas', icon: Target, to: '/metas' },
-    { label: 'Contratos', icon: FileText, to: '/contratos' },
+    // { label: 'Contratos', icon: FileText, to: '/contratos' }, // desativado temporariamente
   ]},
 ];
 

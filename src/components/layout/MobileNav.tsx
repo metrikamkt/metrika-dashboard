@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, DollarSign, Kanban, Users, ClipboardList,
-  TrendingUp, Package, UserCheck, Target, FileText, MoreHorizontal, X,
+  TrendingUp, Package, UserCheck, Target, MoreHorizontal, X,
 } from 'lucide-react';
 
 const PRIMARY = [
@@ -29,7 +29,7 @@ const MORE_GROUPS = [
   ]},
   { section: 'Estratégia', items: [
     { label: 'Metas',     icon: Target,     to: '/metas'     },
-    { label: 'Contratos', icon: FileText,   to: '/contratos' },
+    // { label: 'Contratos', icon: FileText,   to: '/contratos' }, // desativado temporariamente
   ]},
 ];
 

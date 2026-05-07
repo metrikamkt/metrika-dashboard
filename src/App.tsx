@@ -17,7 +17,7 @@ import Clientes from './pages/Clientes';
 import Produtos from './pages/Produtos';
 import Pessoas from './pages/Pessoas';
 import Metas from './pages/Metas';
-import Contratos from './pages/Contratos';
+// import Contratos from './pages/Contratos'; // desativado temporariamente
 import Demandas from './pages/Demandas';
 import Perfil from './pages/Perfil';
 
@@ -44,7 +44,7 @@ function AppShell() {
                   <Route path="/produtos" element={<Produtos />} />
                   <Route path="/pessoas" element={<Pessoas />} />
                   <Route path="/metas" element={<Metas />} />
-                  <Route path="/contratos" element={<Contratos />} />
+                  {/* <Route path="/contratos" element={<Contratos />} /> */}{/* desativado temporariamente */}
                   <Route path="/perfil" element={<Perfil />} />
                 </Routes>
               </main>
